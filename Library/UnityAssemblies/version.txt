@@ -1,5 +1,5 @@
 5.4.1f1:2.3.0.0
-StandaloneOSXIntel
+Android
 /Applications/Unity/Unity.app/Contents/Managed/UnityEngine.dll
 /Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll
 /Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll
@@ -11,4 +11,5 @@ StandaloneOSXIntel
 /Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/EditorTestsRunner/Editor/UnityEditor.EditorTestsRunner.dll
 /Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/TreeEditor/Editor/UnityEditor.TreeEditor.dll
 /Applications/Unity/Unity.app/Contents/Managed/UnityEditor.Graphs.dll
+/Applications/Unity/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
 /Applications/Unity/Unity.app/Contents/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll

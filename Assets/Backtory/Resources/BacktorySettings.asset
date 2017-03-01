@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 161251863, guid: 3555c99d6e995e34ca65a5c6168bb574, type: 3}
+  m_Name: BacktorySettings
+  m_EditorClassIdentifier: 
+  _backtoryAuthId: 575d1432e4b099f61fd535cd
+  _backtoryAuthClientKey: 575d1432e4b006215e29ad9a
+  _backtoryCloudcodeId: 575d1433e4b099f61fd535d1
+  _backtoryGameId: 575d1432e4b099f61fd535d0
+  _backtoryConnectivityId: 57fb6c32e4b064683efcbfa8
+  _backtoryObjectStorageId: 575d1432e4b099f61fd535cf
+  _backtoryFileStorageId: 578df3c9e4b0ca538f290810
