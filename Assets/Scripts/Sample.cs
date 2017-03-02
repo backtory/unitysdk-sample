@@ -182,7 +182,7 @@ namespace Assets.BacktorySample
 
 
 		/*
-		 * Storage
+		 * File Storage
 		 */
 		public void chooseFile() {
 //			string path = EditorUtility.OpenFilePanel ("Choose Your File.", "~/Desktop/4plus_update/assets/", "png");
@@ -195,8 +195,8 @@ namespace Assets.BacktorySample
 		private string filePathAtServer;
 
 		public void uploadFile() {
-			var bf = new BacktoryFile ();
-			bf.UploadInBackground (chosenFilePath.text, "tmp", true, (response) => {
+			var bf = new BacktoryFile (chosenFilePath.text);
+			bf.UploadInBackground ("/tmp/", true, (response) => {
 				ResultText.text = response.Successful ? "upload file succeeded.\n" + 
 					JsonConvert.SerializeObject (response.Body, Formatting.Indented, JsonnetSetting ()) : "failed; " + response.Message;
 				if (response.Successful)
@@ -205,26 +205,24 @@ namespace Assets.BacktorySample
 		}
 
 		public void renameFile() {
-//			if (filePathAtServer == null) {
-//				ResultText.text = "No file path at server available!";
-//				return;
-//			}
-			var bf = new BacktoryFile (filePathAtServer);
-			bf.RenameInBackground ("another_name.png", (response) => {
+			if (filePathAtServer == null) {
+				ResultText.text = "No file path at server available!";
+				return;
+			}
+			BacktoryFile.RenameInBackground (filePathAtServer, "another_name.png", (response) => {
 				ResultText.text = response.Successful ? "rename file succeeded.\n" + 
 					JsonConvert.SerializeObject (response.Body, Formatting.Indented, JsonnetSetting ()) : "failed; " + response.Message;
-//				if (response.Successful)
-//					filePathAtServer = response.Body;
+				if (response.Successful)
+					filePathAtServer = BacktoryFile.RemoveBucketNameFromRenameResponse(response.Body);
 			});
 		}
 
 		public void deleteFile() {
-//			if (filePathAtServer == null) {
-//				ResultText.text = "No file path at server available!";
-//				return;
-//			}
-			var bf = new BacktoryFile (filePathAtServer);
-			bf.DeleteInBackground (false, (response) => {
+			if (filePathAtServer == null) {
+				ResultText.text = "No file path at server available!";
+				return;
+			}
+			BacktoryFile.DeleteInBackground (filePathAtServer, false, (response) => {
 				ResultText.text = response.Successful ? "delete file succeeded." : "failed; " + response.Message;
 				if (response.Successful)
 					filePathAtServer = null;
@@ -232,8 +230,11 @@ namespace Assets.BacktorySample
 		}
 
 		public void uploadMultipleFile() {
-			var bf = new BacktoryFile.Bulk ();
+//			var bf = new BacktoryFile.Bulk ();
 		}
+
+
+
 
 		/* 
 		 * Matchmaking

@@ -390,36 +390,13 @@
             Helping work with multiple files.
             </summary>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryFile.#ctor">
-      <summary>
-            Use this constructor if you want to upload a local file to Backtory server.
-            </summary>
-      <example>
-        <code>
-            BacktoryFile bf = new BacktoryFile();
-            bf.Upload(@"D:\Pictures\user45.png", "userAvatarsFolder", false);
-            </code>
-      </example>
-    </member>
-    <member name="M:Backtory.Core.Public.BacktoryFile.#ctor(System.String)">
-      <summary>
-            Creates a BacktoryFile, pointing to specific resource (file or folder) in backtory server. Use this constructor
-            if you want to delete or rename a file in server. Note that <b>address must begin with a '/' and if points to a directory, ends with a '/' too.</b></summary>
-      <example>
-        <code>
-            BacktoryFile bf = new BacktoryFile("userAvatarsFolder/user45.png");
-            bf.Delete();
-            </code>
-      </example>
-      <param name="fileSavedUrl">Address of file in backtory server</param>
-    </member>
-    <member name="M:Backtory.Core.Public.BacktoryFile.Upload(System.String,System.String,System.Boolean)">
+    <member name="M:Backtory.Core.Public.BacktoryFile.Upload(System.String,System.Boolean)">
       <summary>
             Uploads the file specified by <paramref name="fileAddress" /> to backtory server synchronously. 
-            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryFile.UploadInBackground(System.String,System.String,System.Boolean,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})" />
+            <para>Typically, you should use <see cref="!:UploadInBackground(string, string, bool, Action&lt;IBacktoryResponse&lt;string&gt;&gt;)" />
             instead of this, unless you are managing your own threading.</para><para>Beware that <u>Separator</u> character may vary in the running context with Backtory, 
             For example in windows it's '\' but and in backtory its '/'. 
-            Also note that if the file name contains certain characters, it will be changed on server witch can be found in <see cref="P:Backtory.Core.Public.BacktoryFile.SavedUrl" /></para></summary>
+            Also note that if the file name contains certain characters, it will be changed on server witch can be found in <see cref="!:SavedUrl" /></para></summary>
       <param name="fileAddress">Absolute Address of local file to upload. For example @"D:\Pictures\user45.png"</param>
       <param name="uploadPath">Relative address of directory the file should be uploaded there. If not provided, file will be uploaded
             on root of your storage. This cannot contain certain characters.</param>
@@ -428,13 +405,13 @@
       <returns>Result of this operation as a <c>IBacktoryResponse</c>. If successful, the response contains
             the address of file on server.</returns>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryFile.UploadInBackground(System.String,System.String,System.Boolean,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})">
+    <member name="M:Backtory.Core.Public.BacktoryFile.UploadInBackground(System.String,System.Boolean,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})">
       <summary>
             Uploads the file specified by <paramref name="fileAddress" /> to backtory server in background.
-            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryFile.Upload(System.String,System.String,System.Boolean)" />, unless your code is already
+            <para>This is preferable to using <see cref="!:Upload(string, string, bool)" />, unless your code is already
             running from a background thread.</para><para>Beware that <i>Separator</i> character may vary in the running context with Backtory, 
             For example in windows it's '\' but and in backtory its '/'. 
-            Also note that if the file name contains certain characters, it will be changed on server witch can be found in <see cref="P:Backtory.Core.Public.BacktoryFile.SavedUrl" /></para></summary>
+            Also note that if the file name contains certain characters, it will be changed on server witch can be found in <see cref="!:SavedUrl" /></para></summary>
       <param name="fileAddress">Absolute Address of local file to upload. For example @"D:\Pictures\user45.png"</param>
       <param name="uploadPath">Relative address the place the file should be uploaded there. If not provided, file will be uploaded
             on root of your storage. This cannot contain certain characters.</param>
@@ -443,20 +420,20 @@
       <param name="callback">A method to execute with the result of this operation as a <c>IBacktoryResponse</c>.
             If upload is successful, response contains the address of file on server. </param>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryFile.Rename(System.String)">
+    <member name="M:Backtory.Core.Public.BacktoryFile.Rename(System.String,System.String)">
       <summary>
             Renames a file on backtory server synchronously. You <b>cannot</b> rename a folder!
-            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryFile.RenameInBackground(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})" />
+            <para>Typically, you should use <see cref="!:RenameInBackground(string, Action&lt;IBacktoryResponse&lt;string&gt;&gt;)" />
             instead of this, unless you are managing your own threading.</para></summary>
       <param name="newName">New name for this file. Cannot contain certain characters like ' '.</param>
       <returns>Result of this operation as a <c>IBacktoryResponse</c>. If successful, the response contains
             the new address of file on server. <b>Warning: </b>Sadly the returned address has your bucket name as a prefix. For example if you've set
             your bucket name in panel as "backtory", and newName is "/avatars/user45 edited.png", response body would be "backtory/avatars/user45+edited.png"</returns>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryFile.RenameInBackground(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})">
+    <member name="M:Backtory.Core.Public.BacktoryFile.RenameInBackground(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})">
       <summary>
             Renames a file on Backtory server in background. You <b>cannot</b> rename a folder!
-            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryFile.Rename(System.String)" />, unless your code is already
+            <para>This is preferable to using <see cref="!:Rename(string)" />, unless your code is already
             running from a background thread.</para></summary>
       <param name="newName">New name for this file. Cannot contain certain characters like ' '.</param>
       <param name="callback">A method to execute with the result of this operation as a <c>IBacktoryResponse</c>.
@@ -465,34 +442,21 @@
             your bucket name in panel as "backtory", and newName is "/avatars/user45 edited.png", response body would be "backtory/avatars/user45+edited.png"
             </param>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryFile.Delete(System.Boolean)">
+    <member name="M:Backtory.Core.Public.BacktoryFile.Delete(System.String,System.Boolean)">
       <summary>
             Deletes this resource (file or folder) from server synchronously. 
-            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryFile.DeleteInBackground(System.Boolean,System.Action{Backtory.Core.Public.IBacktoryResponse})" />
+            <para>Typically, you should use <see cref="!:DeleteInBackground(bool, Action&lt;IBacktoryResponse&gt;)" />
             instead of this, unless you are managing your own threading.</para></summary>
       <param name="deleteContentsIfFolder">If true and this is a folder, will delete the folder along the all subfile/sub-folders</param>
       <returns>Result of this operation as a <c>IBacktoryResponse</c>.</returns>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryFile.DeleteInBackground(System.Boolean,System.Action{Backtory.Core.Public.IBacktoryResponse})">
+    <member name="M:Backtory.Core.Public.BacktoryFile.DeleteInBackground(System.String,System.Boolean,System.Action{Backtory.Core.Public.IBacktoryResponse})">
       <summary>
             Deletes this resource (file or folder) from server in background.
-            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryFile.RenameInBackground(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})" />
+            <para>Typically, you should use <see cref="!:RenameInBackground(string, Action&lt;IBacktoryResponse&lt;string&gt;&gt;)" />
             instead of this, unless you are managing your own threading.</para></summary>
       <param name="deleteContentsIfFolder">If true and this is a folder, will delete the folder along the all subfile/sub-folders</param>
       <param name="callback">A method to execute with the result of this operation as a <c>IBacktoryResponse</c>.</param>
-    </member>
-    <member name="M:Backtory.Core.Public.BacktoryFile.DefaultUploadAddress">
-      <summary>
-            Default folder for uploading files. Surpassed by <c>upload path</c> parameter in all variants of <c>Upload</c> method.
-            Base method returns root folder. 
-            </summary>
-      <returns>Default folder for uploading files</returns>
-    </member>
-    <member name="P:Backtory.Core.Public.BacktoryFile.SavedUrl">
-      <summary>
-            If your file address contains characters like ' ', Backtory saves the file with a modified address.
-            This property shows the file address in backtory server.
-            </summary>
     </member>
     <member name="T:Backtory.Core.Public.BacktoryGameEvent">
       <summary>
@@ -741,13 +705,13 @@
       <param name="callback">
       </param>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryDirectChat.#ctor(System.String)">
+    <member name="M:Backtory.Core.Public.BacktoryChat.Direct.#ctor(System.String)">
       <summary>
             A 2-Player chat. 
             </summary>
       <param name="receiverUserId"> UserId of whom this message must deliver to.</param>
     </member>
-    <member name="P:Backtory.Core.Public.BacktoryDirectChat.ReceiverUserId">
+    <member name="P:Backtory.Core.Public.BacktoryChat.Direct.ReceiverUserId">
       <summary>
             UserId of whom this message must deliver to.
             </summary>
