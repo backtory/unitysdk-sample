@@ -14,6 +14,7 @@ namespace Assets.BacktorySample
 
 	public class Sample : MonoBehaviour
 	{
+		public Text MessageText;
 		public Text ResultText;
 		private int CoinValue;
 		private int TimeValue;
@@ -256,17 +257,17 @@ namespace Assets.BacktorySample
 		public void realtimeConnect() {
 			BacktoryClient.StartRealtimeService (new BacktoryConnectionStatusListener() {
 				OnOpen = () => {
-					ResultText.text = "Realtime service started successfully!";
+					MessageText.text = "Realtime service started successfully!";
 				},
 				OnClose = () => {
-					ResultText.text = "Realtime service stopped successfully!";
+					MessageText.text = "Realtime service stopped successfully!";
 				},
 				OnError = (message) => {
-					ResultText.text = "start realtime error!" + message;
+					MessageText.text = "start realtime error!" + message;
 				}
 			});
 			BacktoryClient.SetOnErrorListener ((errorMsg) => {
-				ResultText.text = JsonConvert.SerializeObject (errorMsg, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = JsonConvert.SerializeObject (errorMsg, Formatting.Indented, JsonnetSetting ());
 			});
 		}
 
@@ -277,14 +278,14 @@ namespace Assets.BacktorySample
 		public void requestMatch() {
 			mm = new BacktoryMatchMaking ("matchmaking1", 100);
 			mm.OnMatchFound = (match) => {
-				ResultText.text = "Match found!\n" + JsonConvert.SerializeObject (match, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Match found!\n" + JsonConvert.SerializeObject (match, Formatting.Indented, JsonnetSetting ());
 				setupRealtimeGame(match);
 			};
 			mm.OnPlayerAddedToMatchMaking = (participantList) => {
-				ResultText.text = "Player added to matchmaking!\n" + JsonConvert.SerializeObject (participantList, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Player added to matchmaking!\n" + JsonConvert.SerializeObject (participantList, Formatting.Indented, JsonnetSetting ());
 			};
 			mm.OnMatchNotFound = (message) => {
-				ResultText.text = "Match not found!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Match not found!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
 
 			mm.Request ("Guess who is back.", (response) => {
@@ -293,14 +294,14 @@ namespace Assets.BacktorySample
 		}
 
 		public void cancelMatchRequest() {
-			if (mm != null) {
-				mm.Cancel ((response) => {
-					ResultText.text = response.Successful ? "Canceling request match succeeded." :
-						"failed; " + response.Message;
-				});
-			} else {
+			if (mm == null) {
 				ResultText.text = "No matchmaking available!";
-			}
+				return;
+			}				
+			mm.Cancel ((response) => {
+				ResultText.text = response.Successful ? "Canceling request match succeeded." :
+					"failed; " + response.Message;
+			});
 		}
 
 
@@ -327,20 +328,20 @@ namespace Assets.BacktorySample
 
 		private void setChallengeListeners() {
 			BacktoryChallenge.SetOnInvitingToChallengeListener((message) => {
-				ResultText.text = "Invited to a challenge!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Invited to a challenge!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 				invitedChallenge = message;
 			});
 			BacktoryChallenge.SetOnChallengeFailedListener((message) => {
-				ResultText.text = "Challenge failed!\n" + JsonConvert.SerializeObject (message.Cause, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Challenge failed!\n" + JsonConvert.SerializeObject (message.Cause, Formatting.Indented, JsonnetSetting ());
 			});
 			BacktoryChallenge.SetOnChallengeAcceptedListener((message) => {
-				ResultText.text = "Challenge accepted!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Challenge accepted!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			});
 			BacktoryChallenge.SetOnChallengeRejectedListener((message) => {
-				ResultText.text = "Challenge rejected!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Challenge rejected!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			});
 			BacktoryChallenge.SetOnChallengeReadyListener((match) => {
-				ResultText.text = "Challenge is ready!\n" + JsonConvert.SerializeObject (match, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Challenge is ready!\n" + JsonConvert.SerializeObject (match, Formatting.Indented, JsonnetSetting ());
 				setupRealtimeGame(match);
 			});		
 		}
@@ -357,7 +358,6 @@ namespace Assets.BacktorySample
 					ResultText.text = response.Message;
 				}
 			});
-			// TODO tell alireza about parameters order in Android and Unity!
 		}
 
 		public void cancelChallenge() {
@@ -405,31 +405,31 @@ namespace Assets.BacktorySample
 		private void setupRealtimeGame(BacktoryMatch match) {
 			realtimeGame = new BacktoryRealtimeGame (match);
 			realtimeGame.OnAPlayerMove = (message) => {
-				ResultText.text = JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
 			realtimeGame.OnDirectMessage = (message) => {
-				ResultText.text = "Direct chat received.\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Direct chat received.\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
 			realtimeGame.OnError = (message) => {
-				ResultText.text = "Error occurred!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Error occurred!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
 			realtimeGame.OnGameEnded = (message) => {
-				ResultText.text = "Game ended!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Game ended!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
 			realtimeGame.OnGameStarted = () => {
-				ResultText.text = "Game started !!!!!!!!!!";
+				MessageText.text = "Game started !!!!!!!!!!";
 			};
 			realtimeGame.OnPlayerJoined = (message) => {
-				ResultText.text = "Player joined the game!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Player joined the game!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
 			realtimeGame.OnPlayerLeft = (message) => {
-				ResultText.text = "Player left the game!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Player left the game!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
 			realtimeGame.OnPublicMessage = (message) => {
-				ResultText.text = "Public message received!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Public message received!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
 			realtimeGame.OnServerMessage = (message) => {
-				ResultText.text = "Server message received!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Server message received!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
 		}
 
@@ -493,26 +493,26 @@ namespace Assets.BacktorySample
 			BacktoryUser.LoginInBackground("testUser", "12341234", (IBacktoryResponse response) => {
 				ResultText.text = response.Successful ? "chat user login succeeded" : "failed; " + response.Message;
 				BacktoryChat.Direct.SetOnReceivingMessageListener ((BacktoryDirectChatMessage message) => {
-					ResultText.text = JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+					MessageText.text = JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 				});
 				BacktoryChat.Group.SetOnInvitingToJoinListener((message) => {
-					ResultText.text = "Invited to join!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+					MessageText.text = "Invited to join!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 					invitedGroupId = message.GroupId;
 				});
 				BacktoryChat.Group.SetOnMemberAddedListener((message) => {
-					ResultText.text = "Member added to group!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+					MessageText.text = "Member added to group!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 				});
 				BacktoryChat.Group.SetOnMemberJoinedListener((message) => {
-					ResultText.text = "Member joined the group!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+					MessageText.text = "Member joined the group!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 				});
 				BacktoryChat.Group.SetOnMemberLeftListener((message) => {
-					ResultText.text = "Member left the group!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+					MessageText.text = "Member left the group!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 				});
 				BacktoryChat.Group.SetOnMemberRemovedListener((message) => {
-					ResultText.text = "Member is removed from group!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+					MessageText.text = "Member is removed from group!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 				});
 				BacktoryChat.Group.SetOnReceivingMessageListener((message) => {
-					ResultText.text = "Message received from group chat!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+					MessageText.text = "Message received from group chat!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 				});
 			});
 		}
@@ -529,8 +529,7 @@ namespace Assets.BacktorySample
 			BacktoryChat.OfflineMessages (PrintCallBack<IList<AbsChatMessage>>());
 		}
 
-		public static long CurrentTimeMillis()
-		{
+		public static long CurrentTimeMillis() {
 			DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 			return (long) (DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
 		}
