@@ -1,20 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
+using System.IO;
 
 public class UIController : MonoBehaviour {
 
-	// Use this for initialization
-	public RectTransform currentTab;
+	public RectTransform authTab;
+	public RectTransform authPanel;
+	public RectTransform realtimeTab;
 
+	// Use this for initialization
 	void Start () {
-		makeTabSelected(currentTab);
+		currentTab = authTab;
+		makeTabSelected(authTab);
+		authPanel.GetComponent<RectTransform> ().SetAsLastSibling ();
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		
 	}
+
+	private RectTransform currentTab;
 
 	public void makeTabSelected(RectTransform tab) {
 		// Deselect current tab
@@ -27,5 +35,15 @@ public class UIController : MonoBehaviour {
 
 		// Save a reference to the input tab
 		currentTab = tab;
+	}
+
+	public void enableRealtimeModule () {
+		realtimeTab.GetComponent<Button> ().interactable = true;
+	}
+
+	public void disableRealtimeModule () {
+		realtimeTab.GetComponent<Button> ().interactable = false;
+		makeTabSelected (authTab);
+		authPanel.GetComponent<RectTransform> ().SetAsLastSibling ();
 	}
 }
