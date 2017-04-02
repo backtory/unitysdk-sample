@@ -3537,7 +3537,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2106121528}
-        m_MethodName: onGuestRegisterClick
+        m_MethodName: onGuestLoginClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3752,7 +3752,7 @@ RectTransform:
   - {fileID: 2131862099}
   - {fileID: 1342099101}
   m_Father: {fileID: 1176262428}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -9214,9 +9214,9 @@ RectTransform:
   - {fileID: 1550129706}
   - {fileID: 428374018}
   - {fileID: 1874419504}
+  - {fileID: 1450841113}
   - {fileID: 544185320}
   - {fileID: 1345238141}
-  - {fileID: 1450841113}
   m_Father: {fileID: 2106121527}
   m_RootOrder: 1
   m_AnchorMin: {x: 0, y: 0}
@@ -10691,7 +10691,7 @@ RectTransform:
   - {fileID: 1005841576}
   - {fileID: 1585174473}
   m_Father: {fileID: 1176262428}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -11538,7 +11538,7 @@ GameObject:
   - 114: {fileID: 1408975814}
   - 114: {fileID: 1408975813}
   m_Layer: 5
-  m_Name: ConnectToMatch
+  m_Name: JoinGame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11603,7 +11603,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2106121528}
-        m_MethodName: connectToMatch
+        m_MethodName: joinGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11805,7 +11805,7 @@ RectTransform:
   - {fileID: 488909820}
   - {fileID: 606477429}
   m_Father: {fileID: 1176262428}
-  m_RootOrder: 7
+  m_RootOrder: 5
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -13071,9 +13071,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Connect to match
-
-'
+  m_Text: Join game
 --- !u!222 &1608151962
 CanvasRenderer:
   m_ObjectHideFlags: 0

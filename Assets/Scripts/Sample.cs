@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using UnityEngine;
 using UnityEngine.UI;
-using Backtory.Core.Internal;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.IO;
@@ -64,7 +63,7 @@ namespace Assets.BacktorySample
 		/*
 		 * Auth
 		 */
-		public void onGuestRegisterClick ()
+		public void onGuestLoginClick ()
 		{
 			BacktoryUser.LoginAsGuestInBackground (response =>
 				ResultText.text = response.Successful ? "Login as guest succeeded." : "failed; " + response.Message
@@ -73,13 +72,14 @@ namespace Assets.BacktorySample
 
 		public void onRegisterClick ()
 		{
-			new BacktoryUser.Builder ().SetFirstName ("FirstName").
-          		SetLastName ("LastName").
-				SetUsername (usernameInput.text).
-				SetEmail (emailInput.text).
-				SetPassword (passwordInput.text).
-          		SetPhoneNumber ("09121234567").
-          		build ().RegisterInBackground (PrintCallBack<BacktoryUser> ());
+			new BacktoryUser {
+				FirstName = "FirstName",
+				LastName = "LastName",
+				Username = usernameInput.text,
+				Email = emailInput.text,
+				Password = passwordInput.text,
+				PhoneNumber = "09121234567"
+			}.RegisterInBackground (PrintCallBack<BacktoryUser> ());
 		}
 
 		public void onLoginClick ()
@@ -91,12 +91,12 @@ namespace Assets.BacktorySample
 
 		public void onCurrentUserClick ()
 		{
-			ResultText.text = JsonConvert.SerializeObject (BacktoryUser.GetCurrentUser (), Formatting.Indented, JsonnetSetting ());
+			ResultText.text = JsonConvert.SerializeObject (BacktoryUser.CurrentUser, Formatting.Indented, JsonnetSetting ());
 		}
 
 		public void onCompleteRegistration ()
 		{
-			BacktoryUser.GetCurrentUser ().CompleteRegistrationInBackgrond (new BacktoryUser.GuestCompletionParam () {
+			BacktoryUser.CurrentUser.CompleteRegistrationInBackgrond (new BacktoryUser.GuestCompletionParam () {
 				FirstName = "GuestFirstName",
 				LastName = "GuestLastName",
 				Email = emailInput.text,
@@ -111,14 +111,14 @@ namespace Assets.BacktorySample
 				ResultText.text = "Enter the new password!";
 				return;
 			}
-			BacktoryUser.GetCurrentUser ().ChangePasswordInBackground (passwordInput.text, newPasswordInput.text, changePassResponse => {
+			BacktoryUser.CurrentUser.ChangePasswordInBackground (passwordInput.text, newPasswordInput.text, changePassResponse => {
 				ResultText.text = changePassResponse.Successful ? "Change password succeeded." : "failed; " + changePassResponse.Message;
 			});
 		}
 
 		public void onUpdateUser ()
 		{
-			var user = BacktoryUser.GetCurrentUser ();
+			BacktoryUser user = BacktoryUser.CurrentUser;
 			user.FirstName = "UpdatedFirstName";
 			user.LastName = "UpdatedLastName";
 			user.Username = usernameInput.text;
@@ -270,8 +270,8 @@ namespace Assets.BacktorySample
 				MessageText.text = "Match found!\n" + JsonConvert.SerializeObject (match, Formatting.Indented, JsonnetSetting ());
 				setupRealtimeGame(match);
 			};
-			mm.OnPlayerAddedToMatchMaking = (participantList) => {
-				MessageText.text = "Player added to matchmaking!\n" + JsonConvert.SerializeObject (participantList, Formatting.Indented, JsonnetSetting ());
+			mm.OnMatchmakingUpdate = (participantList) => {
+				MessageText.text = "Matchmaking update received!\n" + JsonConvert.SerializeObject (participantList, Formatting.Indented, JsonnetSetting ());
 			};
 			mm.OnMatchNotFound = (message) => {
 				MessageText.text = "Match not found!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
@@ -316,9 +316,9 @@ namespace Assets.BacktorySample
 		BacktoryChallenge invitedChallenge;
 
 		private void setChallengeListeners() {
-			BacktoryChallenge.SetOnInvitingToChallengeListener((message) => {
-				MessageText.text = "Invited to a challenge!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
-				invitedChallenge = message;
+			BacktoryChallenge.SetOnChallengeInvitationListener((challenge) => {
+				MessageText.text = "Invited to a challenge!\n" + JsonConvert.SerializeObject (challenge, Formatting.Indented, JsonnetSetting ());
+				invitedChallenge = challenge;
 			});
 			BacktoryChallenge.SetOnChallengeFailedListener((message) => {
 				MessageText.text = "Challenge failed!\n" + JsonConvert.SerializeObject (message.Cause, Formatting.Indented, JsonnetSetting ());
@@ -338,15 +338,15 @@ namespace Assets.BacktorySample
 		BacktoryChallenge requestedChallenge;
 
 		public void requestChallenge() {
-			if (BacktoryUser.GetCurrentUser () == null) {
+			if (BacktoryUser.CurrentUser == null) {
 				ResultText.text = "Not logged in yet!";
 				return;
 			}
 
 			IList<string> challengedUsers = new List<string>();
-			if (BacktoryUser.GetCurrentUser ().Username == testUser1.username) {
+			if (BacktoryUser.CurrentUser.Username == testUser1.username) {
 				challengedUsers.Add (testUser2.userId);
-			} else if (BacktoryUser.GetCurrentUser ().Username == testUser2.username) {
+			} else if (BacktoryUser.CurrentUser.Username == testUser2.username) {
 				challengedUsers.Add (testUser1.userId);
 			}
 
@@ -391,14 +391,14 @@ namespace Assets.BacktorySample
 		}
 
 		public void requestActiveChallenges() {
-			BacktoryChallenge.ActiveChallengs (PrintCallBack<IList<BacktoryChallenge>>());
+			BacktoryChallenge.ActiveChallenges (PrintCallBack<IList<BacktoryChallenge>>());
 		}
 
 
 
 
 		/* 
-		 * Realtime 
+		 * Realtime
 		 */
 		BacktoryRealtimeGame realtimeGame;
 
@@ -406,8 +406,8 @@ namespace Assets.BacktorySample
 			this.GetComponent<UIController> ().enableRealtimeModule ();
 
 			realtimeGame = new BacktoryRealtimeGame (match);
-			realtimeGame.OnAPlayerMove = (message) => {
-				MessageText.text = JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+			realtimeGame.OnGameEvent = (message) => {
+				MessageText.text = "Game event received!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
 			realtimeGame.OnDirectMessage = (message) => {
 				MessageText.text = "Direct chat received.\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
@@ -422,8 +422,14 @@ namespace Assets.BacktorySample
 			realtimeGame.OnGameStarted = () => {
 				MessageText.text = "Game started !!!!!!!!!!";
 			};
+			realtimeGame.OnGameStartedWebhook = (message) => {
+				Debug.Log("Your start webhook returned this message: " + message);
+			};
 			realtimeGame.OnPlayerJoined = (message) => {
 				MessageText.text = "Player joined the game!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+			};
+			realtimeGame.OnPlayerJoinedWebhook = (message) => {
+				Debug.Log("Your join webhook sent this message to you: " + message);
 			};
 			realtimeGame.OnPlayerLeft = (message) => {
 				MessageText.text = "Player left the game!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
@@ -434,14 +440,16 @@ namespace Assets.BacktorySample
 			realtimeGame.OnServerMessage = (message) => {
 				MessageText.text = "Server message received!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 			};
+			realtimeGame.OnWebHookError = (message) => {
+				Debug.Log ("Error in server webhook: " + message);
+			};
 		}
 
-		public void connectToMatch() {
+		public void joinGame() {
 			if (realtimeGame == null) {
 				ResultText.text = "No match is available.";
 				return;
 			}
-			realtimeGame.Join ();
 		}
 
 		public void sendEvent() {
@@ -450,7 +458,7 @@ namespace Assets.BacktorySample
 				return;
 			}
 			Dictionary<string, string> data = new Dictionary<string, string>();
-			realtimeGame.SendPlayerMoves(messageInput.text, data);
+			realtimeGame.SendGameEvent(messageInput.text, data);
 		}
 
 		public void directMessage() {
@@ -458,15 +466,15 @@ namespace Assets.BacktorySample
 				ResultText.text = "No match is available.";
 				return;
 			}
-			if (BacktoryUser.GetCurrentUser () == null) {
+			if (BacktoryUser.CurrentUser == null) {
 				ResultText.text = "Not logged in yet!";
 				return;
 			}
 
 			string contactUserId = "";
-			if (BacktoryUser.GetCurrentUser ().Username == testUser1.username) {
+			if (BacktoryUser.CurrentUser.Username == testUser1.username) {
 				contactUserId = testUser2.userId;
-			} else if (BacktoryUser.GetCurrentUser ().Username == testUser2.username) {
+			} else if (BacktoryUser.CurrentUser.Username == testUser2.username) {
 				contactUserId = testUser1.userId;
 			}
 
@@ -506,7 +514,7 @@ namespace Assets.BacktorySample
 		public void loginChatUser() {
 			BacktoryUser.LoginInBackground(testUser1.username, testUser1.password, (IBacktoryResponse response) => {
 				ResultText.text = response.Successful ? "Chat user login succeeded" : "failed; " + response.Message;
-				BacktoryChat.Direct.SetOnReceivingMessageListener ((BacktoryDirectChatMessage message) => {
+				BacktoryChat.Direct.SetOnReceivingMessageListener ((message) => {
 					MessageText.text = JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
 				});
 				BacktoryChat.Group.SetOnInvitingToJoinListener((message) => {
@@ -563,6 +571,7 @@ namespace Assets.BacktorySample
 			int id = UnityEngine.Random.Range (0, 10);
 			BacktoryChat.Group.CreateNewGroup ("MyGroup" + id, BacktoryChat.Group.Mode.Private,
 				PrintCallBack<BacktoryChat.Group>());
+			
 		}
 
 		public void requestGroupsList() {
@@ -576,8 +585,7 @@ namespace Assets.BacktorySample
 
 		public void requestMembersList() {
 			var bgc = new BacktoryChat.Group (myGroupId);
-			bgc.MembersInfo (PrintCallBack<BacktoryGroupMembersInfoResponse>());
-
+			bgc.MembersInfo (PrintCallBack<IList<BacktoryGroupMember>>());
 		}
 
 		public void addGroupMember() {

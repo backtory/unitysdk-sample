@@ -4,6 +4,27 @@
     <name>Backtory</name>
   </assembly>
   <members>
+    <member name="P:Backtory.Core.Public.BacktoryMatchFoundMessages.Address">
+      <summary>
+            Address of websocket player must connect in order to play the realtime match
+            </summary>
+    </member>
+    <member name="F:Backtory.Core.Public.BacktoryChallengeFailureCause.Expired">
+      <summary>
+            Duration set in <see cref="!:ChallengeRequest.ChallengeRequest(IList&lt;string&gt;, int, int, Action&lt;IBacktoryResponse&lt;BacktoryChallengeResponse&gt;&gt;)" />
+            throu 'WaitTime' parameter has passed
+            </summary>
+    </member>
+    <member name="F:Backtory.Core.Public.BacktoryChallengeFailureCause.FormedWithouYou">
+      <summary>
+            Minimum number of players needed for forming the challenge are gathered and you cannot be a part of challenge any more.
+            </summary>
+    </member>
+    <member name="F:Backtory.Core.Public.BacktoryChallengeFailureCause.Impossible">
+      <summary>
+            Even if you accept the challenge, number of players for forming the challenge won't be enough and thus challenge is impossible to form.
+            </summary>
+    </member>
     <member name="T:Backtory.Core.Public.EventNameAttribute">
       <summary>
             Denotes the name for <see cref="T:Backtory.Core.Public.BacktoryGameEvent" /> object.
@@ -115,7 +136,7 @@
             Synchronously registers a guest account on server and logins with that.
             <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryUser.LoginAsGuestInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})"></see>
             instead of this, unless you are managing your own threading.</para><para>Data of guest user automatically stored on this request succession and you can access that with
-            <see cref="M:Backtory.Core.Public.BacktoryUser.GetCurrentUser"></see></para></summary>
+            <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser"></see></para></summary>
       <returns>Login session details wrapped in a <c>BacktoryResponse</c>.</returns>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryUser.RegisterInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryUser}})">
@@ -163,18 +184,10 @@
       <returns>
       </returns>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryUser.GetCurrentUser">
-      <summary>
-            After a login request Backtory SDK holds the information of logged-in user in RAM and Storage
-            to prevent the network request every time user info is needed.
-            </summary>
-      <returns>currently logged-in user synchronously from memory if data exist on RAM and from DISK if not present
-            in RAM.</returns>
-    </member>
     <member name="M:Backtory.Core.Public.BacktoryUser.CompleteRegistrationInBackgrond(Backtory.Core.Public.BacktoryUser.GuestCompletionParam,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryUser}})">
       <summary>
             Converts a guest user to a normal one with passed information in background.
-            <para>You should get the user object by <see cref="M:Backtory.Core.Public.BacktoryUser.GetCurrentUser" /> because it contains the
+            <para>You should get the user object by <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser" /> because it contains the
             information which backtory server needs to distinct the guest user from others.</para><para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.CompleteRegistration(Backtory.Core.Public.BacktoryUser.GuestCompletionParam)" />,
             unless your code is already running from a background thread</para></summary>
       <param name="guestRegistrationParam">information required for converting guest user to normal user</param>
@@ -185,7 +198,7 @@
       <summary>
             Synchronously converts a guest user to a normal one with passed information
             in backtory server and returns its response.
-            <para>You should get the user object by <see cref="M:Backtory.Core.Public.BacktoryUser.GetCurrentUser" /> because it encloses the
+            <para>You should get the user object by <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser" /> because it encloses the
             information which backtory server needs to distinct the guest user from others.</para></summary>
       <param name="guestRegistrationParam">information required for converting guest user to normal user</param>
       <returns>newly converted user wrapped in a <c>BacktoryResponse</c></returns>
@@ -193,7 +206,7 @@
     <member name="M:Backtory.Core.Public.BacktoryUser.ChangePasswordInBackground(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
       <summary>
             Converts a guest user to a normal one with passed information in background.
-            <para>You should get the user object by <see cref="M:Backtory.Core.Public.BacktoryUser.GetCurrentUser" /> because it contains the
+            <para>You should get the user object by <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser" /> because it contains the
             information which backtory server needs to distinct the guest user from others.</para><para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.CompleteRegistration(Backtory.Core.Public.BacktoryUser.GuestCompletionParam)" />,
             unless your code is already running from a background thread.</para></summary>
       <param name="oldPassword">old password user wants to change</param>
@@ -227,24 +240,32 @@
             instead of this, unless you are managing your own threading.</para></summary>
       <returns>updated user wrapped in a <c>BacktoryResponse</c></returns>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryUser.ClearStorageAndReturnRefreshToken">
-      <summary>
-            We must clear everything first, because logout is independent from server and expiration of refresh-token
-            but if doing that, we can't get refresh token from storage because it's already cleared.
-            </summary>
-    </member>
     <member name="M:Backtory.Core.Public.BacktoryUser.LogoutInBackground">
       <summary>
             Logouts the current user from backtory server and clears every data related to current
-            user. After this method <see cref="M:Backtory.Core.Public.BacktoryUser.GetCurrentUser" /> will return <c>null</c>.
+            user. After this method <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser" /> will return <c>null</c>.
             <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.Logout" />, unless your code is already running from a
             background thread.</para></summary>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryUser.Logout">
       <summary>
             Synchronously logouts the current user from backtory server and clears every data related to
-            user. After this method <see cref="M:Backtory.Core.Public.BacktoryUser.GetCurrentUser" /> will return <c>null.</c><para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryUser.LogoutInBackground" /> 
+            user. After this method <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser" /> will return <c>null.</c><para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryUser.LogoutInBackground" /> 
             instead of this, unless you are managing your own threading</para></summary>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryUser.ClearStorageAndReturnRefreshToken">
+      <summary>
+            We must clear everything first, because logout is independent from server and expiration of refresh-token
+            but if doing that, we can't get refresh token from storage because it's already cleared.
+            </summary>
+    </member>
+    <member name="P:Backtory.Core.Public.BacktoryUser.CurrentUser">
+      <summary>
+            After a login request Backtory SDK holds the information of logged-in user in RAM and Storage
+            to prevent the network request every time user info is needed.
+            </summary>
+      <returns>currently logged-in user synchronously from memory if data exist on RAM and from DISK if not present
+            in RAM.</returns>
     </member>
     <member name="P:Backtory.Core.Public.BacktoryUser.Username">
       <summary>
@@ -286,7 +307,7 @@
       <param name="storageAddress">
       </param>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryClient.SetOnErrorListener(System.Action{Backtory.Core.Internal.BacktoryErrorMessage})">
+    <member name="M:Backtory.Core.Public.BacktoryClient.SetOnErrorListener(System.Action{Backtory.Core.Public.BacktoryErrorMessage})">
       <summary>
             This is temporary and is highly to be replaced later.
             </summary>
@@ -681,18 +702,18 @@
             Simple explanation for backtory responses status code. A successful request has status code betwee
             </summary>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryChallenge.SetOnInvitingToChallengeListener(System.Action{Backtory.Core.Public.BacktoryChallenge})">
+    <member name="M:Backtory.Core.Public.BacktoryChallenge.SetOnChallengeInvitationListener(System.Action{Backtory.Core.Public.BacktoryChallenge})">
       <summary>
             Tells the SDK what to do when an invitation to challenge come. In most of use cases the best place
             for calling this, is right after calling <see cref="M:Backtory.Core.Public.BacktoryClient.StartRealtimeService(Backtory.Core.Public.BacktoryConnectionStatusListener)" /></summary>
-      <param name="onInvitingToChallenge">An action, called when an invitation comes. On Unity it executes
+      <param name="onChallengeInvitation">An action, called when an invitation comes. On Unity it executes
             on main thread so UI elements can be modified in it without problem.
             </param>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryMatchMaking.Request(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
       <summary>
             Requests a matchmaking with given parameters. Result of the process would be either 
-            <see cref="T:Backtory.Core.Internal.BacktoryMatchFoundMessages" /> or <see cref="T:Backtory.Core.Internal.BacktoryMatchNotFoundMessage" />
+            <see cref="T:Backtory.Core.Public.BacktoryMatchFoundMessages" /> or <see cref="T:Backtory.Core.Public.BacktoryMatchNotFoundMessage" />
             which you can be informed of by setting your action to <see cref="P:Backtory.Core.Public.BacktoryMatchMaking.OnMatchFound" />
             and <see cref="P:Backtory.Core.Public.BacktoryMatchMaking.OnMatchNotFound" />.
             </summary>
@@ -713,12 +734,36 @@
     </member>
     <member name="P:Backtory.Core.Public.BacktoryChat.Direct.ReceiverUserId">
       <summary>
-            UserId of whom this message must deliver to.
+            UserId of whom this message must send to.
             </summary>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryChat.Group.History(System.Int64,System.Action{Backtory.Core.Public.IBacktoryResponse{System.Collections.Generic.IList{Backtory.Core.Public.AbsGroupChatMessage}}})">
+      <summary>
+            Fetches messages sent to this group (chat message, user joined, etc) 
+            before the date-time specified by <paramref name="lastDate" /> in descending order of
+            sent time.
+            </summary>
+      <param name="lastDate">A time filter for messages in form of millisecond since 1/1/1970.
+            Response message are all of this group messages sent before this landmark.
+            </param>
+      <param name="callback">
+      </param>
+      <example>
+            It's often the whole history of group which is needed,
+            <code>
+            DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var now = (long)(DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
+            History(now, response =&gt; {/*...all of this group history*/})
+            </code></example>
     </member>
     <member name="P:Backtory.Core.Public.BacktoryConnectivityMessageListener.OnAllMessages">
       <summary>
             called on every message. suitable for log prints
+            </summary>
+    </member>
+    <member name="P:Backtory.Core.Public.BacktoryUserRemovedFromGroupMessage.RemoverUserId">
+      <summary>
+            UserId of the person who has removed the <see cref="P:Backtory.Core.Public.BacktoryUserRemovedFromGroupMessage.RemovedUserId" /> from group.
             </summary>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.SendDirectMessage(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
@@ -738,7 +783,7 @@
             </summary>
       <param name="message">A string to be send to all players in match</param>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.SendPlayerMoves(System.String,System.Collections.Generic.IDictionary{System.String,System.String})">
+    <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.SendGameEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String})">
       <summary>
             Typically for sending a player moves to all other players but could be used for sending whatever kinds of 
             message. <b>Pay attention that you can use this only when match is started and no one has left yet, 
@@ -754,7 +799,7 @@
             service decides which players are real winners based on your setting of matchmaking in your backtory panel.
             </summary>
       <param name="winners">List of those players Ids you found as winners if this match/game.</param>
-      <param name="extraData">Any string. Server delivers it back to you when match ends in <see cref="T:Backtory.Core.Internal.BacktoryMatchEndedMessage" /></param>
+      <param name="extraData">Any string. Server delivers it back to you when match ends in <see cref="T:Backtory.Core.Public.BacktoryGameEndedMessage" /></param>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.Leave">
       <summary>
@@ -811,6 +856,11 @@
       <returns>
       </returns>
     </member>
+    <member name="P:Backtory.Core.Internal.BacktoryJNode.AsJsonArray">
+      <summary>
+            Use this for classes with default constructor
+            </summary>
+    </member>
     <member name="M:Backtory.Core.Internal.ConfigableJsonNet.FromJson(System.String,System.Type)">
       <see cref="M:Backtory.Core.Internal.IJSON.FromJson(System.String,System.Type)" />
     </member>
@@ -820,7 +870,7 @@
     <member name="M:Backtory.Core.Internal.ConfigableJsonNet.ToJson(System.Object,System.Boolean)">
       <see cref="M:Backtory.Core.Internal.IJSON.ToJson(System.Object,System.Boolean)" />
     </member>
-    <member name="M:Backtory.Core.Internal.JsonFactory.get">
+    <member name="M:Backtory.Core.Internal.JsonFactory.getDefault">
       <returns>Default IJSON implementation.</returns>
     </member>
     <member name="M:Backtory.Core.Internal.JsonFactory.getJsonNet(Newtonsoft.Json.JsonSerializerSettings)">
@@ -830,32 +880,6 @@
     <member name="T:Backtory.Core.Internal.MySerializer">
       <summary>
             Custom RestSharp serializer and deserializer which delegates it's methods to an IJSON implementation
-            </summary>
-    </member>
-    <member name="T:Backtory.Core.Internal._MapData">
-      <summary>
-            Represents a backtory realtime message in form of key value data type
-            </summary>
-    </member>
-    <member name="P:Backtory.Core.Internal.BacktoryMatchFoundMessages.Address">
-      <summary>
-            Address of websocket player must connect in order to play the realtime match
-            </summary>
-    </member>
-    <member name="F:Backtory.Core.Internal.BacktoryChallengeFailureCause.Expired">
-      <summary>
-            Duration set in <see cref="!:ChallengeRequest.ChallengeRequest(IList&lt;string&gt;, int, int, Action&lt;IBacktoryResponse&lt;BacktoryChallengeResponse&gt;&gt;)" />
-            throu 'WaitTime' parameter has passed
-            </summary>
-    </member>
-    <member name="F:Backtory.Core.Internal.BacktoryChallengeFailureCause.FormedWithouYou">
-      <summary>
-            Minimum number of players needed for forming the challenge are gathered and you cannot be a part of challenge any more.
-            </summary>
-    </member>
-    <member name="F:Backtory.Core.Internal.BacktoryChallengeFailureCause.Impossible">
-      <summary>
-            Even if you accept the challenge, number of players for forming the challenge won't be enough and thus challenge is impossible to form.
             </summary>
     </member>
     <member name="T:Backtory.Core.Internal.ReflectionHelpers">
@@ -1104,11 +1128,6 @@
       </param>
       <returns>
       </returns>
-    </member>
-    <member name="P:Backtory.Core.Internal.BacktoryUserRemovedFromGroupMessage.RemoverUserId">
-      <summary>
-            UserId of the person who has removed the <see cref="P:Backtory.Core.Internal.BacktoryUserRemovedFromGroupMessage.RemovedUserId" /> from group.
-            </summary>
     </member>
     <member name="T:WebSocketSharp.Ext">
       <summary>
