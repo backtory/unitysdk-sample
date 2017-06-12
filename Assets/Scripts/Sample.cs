@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.IO;
+using RestSharp;
 
 namespace Assets.BacktorySample
 {
@@ -31,6 +32,11 @@ namespace Assets.BacktorySample
 		public InputField serverFilePathInput;
 		public InputField newFileNameInput;
 
+		// Database Module
+		public InputField noteTitleInput;
+		public InputField notePriorityInput;
+		public Toggle notePinnedToggle;
+
 		// Matchmaking Module
 		public InputField categoryInput;
 		public InputField skillInput;
@@ -49,7 +55,6 @@ namespace Assets.BacktorySample
 		// Use this for initialization
 		void Start ()
 		{
-			BacktoryClient.DebugMode = true;
 		}
 
 		// Update is called once per frame
@@ -195,15 +200,14 @@ namespace Assets.BacktorySample
 
 
 
-
 		/*
 		 * File Storage
 		 */
 		private string filePathOnDevice;
 
 		public void uploadFile() {
-			filePathOnDevice = "tmp.txt";
-			File.WriteAllText (filePathOnDevice, fileContentInput.text);	
+			filePathOnDevice = Path.Combine(Application.persistentDataPath, "tmp.txt");
+			File.WriteAllText (filePathOnDevice, fileContentInput.text);
 			var bf = new BacktoryFile (filePathOnDevice);
 			bf.UploadInBackground (serverFilePathInput.text, true, (response) => {
 				ResultText.text = response.Successful ? "Upload file succeeded.\n" + 
@@ -223,6 +227,89 @@ namespace Assets.BacktorySample
 				ResultText.text = response.Successful ? "Delete file succeeded." : "failed; " + response.Message;
 			});
 		}
+
+
+
+
+		/*
+		 * Database (Object Storage)
+		 */
+		BacktoryObject currentNote;
+
+		public void saveNote() {
+			if (currentNote == null) {
+
+				currentNote = new BacktoryObject ("Note");
+				currentNote["title"] = noteTitleInput.text;
+				currentNote["priority"] = int.Parse (notePriorityInput.text);
+				currentNote["pinned"] = notePinnedToggle.isOn;
+
+				currentNote.SaveInBackground (response => {
+					if (response.Successful) {
+						ResultText.text = "New note created successfully!\n" + currentNote.ToString();
+					} else {
+						ResultText.text = "failed; " + response.Message;
+					}
+				});
+			} else {
+				
+				if (noteTitleInput.text != "")
+					currentNote["title"] = noteTitleInput.text;
+				if (notePriorityInput.text != "")
+					currentNote["priority"] = int.Parse(notePriorityInput.text);
+				currentNote["pinned"] = notePinnedToggle.isOn;
+
+				currentNote.SaveInBackground (response => {
+					if (response.Successful) {
+						ResultText.text = "The note updated successfully!\n" + currentNote.ToString();
+					} else {
+						ResultText.text = "failed; " + response.Message;
+					}
+				});
+			}
+		}
+
+		public void deleteNote() {
+			if (currentNote == null) {
+				ResultText.text = "No note (BacktoryObject) is available!";
+				return;
+			}
+			currentNote.DeleteInBackground (response => {
+				if (response.Successful) {
+					ResultText.text = "The note deleted successfully.";
+					currentNote = null;
+				} else {
+					ResultText.text = "failed; " + response.Message;
+				}
+			});
+		}
+
+		public void findAllPinnedNotes() {
+			BacktoryQuery pinnedQuery = new BacktoryQuery ("Note")
+								.WhereEqualTo ("pinned", true);
+			pinnedQuery.FindInBackground (response => {
+				if (response.Successful) {
+					ResultText.text = "Found all pinned notes successfully!\n" + 
+								JsonConvert.SerializeObject (response.Body, Formatting.Indented, JsonnetSetting ());
+				} else {
+					ResultText.text = "failed; " + response.Message;
+				}
+			});
+		}
+
+		public void findTodoTitleNotes() {
+			BacktoryQuery todoQuery = new BacktoryQuery ("Note")
+								.WhereContains ("title", "todo");
+			todoQuery.FindInBackground (response => {
+				if (response.Successful) {
+					ResultText.text = "Found all notes with title containing 'todo' successfully!\n" + 
+								JsonConvert.SerializeObject (response.Body, Formatting.Indented, JsonnetSetting ());
+				} else {
+					ResultText.text = "failed; " + response.Message;
+				}
+			});
+		}
+
 
 
 
@@ -350,7 +437,8 @@ namespace Assets.BacktorySample
 				challengedUsers.Add (testUser1.userId);
 			}
 
-			BacktoryChallenge.CreateNew(challengedUsers, 2, 25, (response) => {
+			BacktoryChallenge.CreateNew(challengedUsers, 2, 25, "challengeName", "metaData",
+				(response) => {
 				if (response.Successful) {
 					ResultText.text = "New challenge requested!\n" + JsonConvert.SerializeObject (response.Body, Formatting.Indented, JsonnetSetting ());
 					requestedChallenge = response.Body;
@@ -417,7 +505,6 @@ namespace Assets.BacktorySample
 			};
 			realtimeGame.OnGameEnded = (message) => {
 				MessageText.text = "Game ended!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
-				this.GetComponent<UIController> ().disableRealtimeModule ();
 			};
 			realtimeGame.OnGameStarted = () => {
 				MessageText.text = "Game started !!!!!!!!!!";
@@ -447,14 +534,15 @@ namespace Assets.BacktorySample
 
 		public void joinGame() {
 			if (realtimeGame == null) {
-				ResultText.text = "No match is available.";
+				ResultText.text = "No game is available.";
 				return;
 			}
+			realtimeGame.Join ();
 		}
 
 		public void sendEvent() {
 			if (realtimeGame == null) {
-				ResultText.text = "No match is available.";
+				ResultText.text = "No game is available.";
 				return;
 			}
 			Dictionary<string, string> data = new Dictionary<string, string>();
@@ -463,7 +551,7 @@ namespace Assets.BacktorySample
 
 		public void directMessage() {
 			if (realtimeGame == null) {
-				ResultText.text = "No match is available.";
+				ResultText.text = "No game is available.";
 				return;
 			}
 			if (BacktoryUser.CurrentUser == null) {
@@ -486,7 +574,7 @@ namespace Assets.BacktorySample
 
 		public void sendChatToMatch() {
 			if (realtimeGame == null) {
-				ResultText.text = "No match is available.";
+				ResultText.text = "No game is available.";
 				return;
 			}
 			realtimeGame.SendPublicMessage (messageInput.text, (response) => {
@@ -496,7 +584,7 @@ namespace Assets.BacktorySample
 
 		public void sendMatchResult() {
 			if (realtimeGame == null) {
-				ResultText.text = "No match is available.";
+				ResultText.text = "No game is available.";
 				return;
 			}
 			IList<string> winners = new List<string>{ testUser1.userId };
@@ -505,7 +593,15 @@ namespace Assets.BacktorySample
 			});
 		}
 
-
+		public void leaveGame() {
+			if (realtimeGame == null) {
+				ResultText.text = "No game is available.";
+				return;
+			}
+			realtimeGame.Leave ();
+			realtimeGame = null;
+			this.GetComponent<UIController> ().disableRealtimeModule ();
+		}
 
 
 		/* 
@@ -662,68 +758,24 @@ namespace Assets.BacktorySample
 			public string email;
 			public string userId;
 		}
-
-		private class TestUserBuilder {
-
-			private TestUser testUser;
-
-			public TestUserBuilder() {
-				testUser = new TestUser();
-			}
-
-			public TestUserBuilder setName(String name) {
-				testUser.name = name;
-				return this;
-			}
-
-			public TestUserBuilder setFamily(String family) {
-				testUser.family = family;
-				return this;
-			}
-
-			public TestUserBuilder setUsername(String username) {
-				testUser.username = username;
-				return this;
-			}
-
-			public TestUserBuilder setPassword(String password) {
-				testUser.password = password;
-				return this;
-			}
-
-			public TestUserBuilder setEmail(String email) {
-				testUser.email = email;
-				return this;
-			}
-
-			public TestUserBuilder setUserId(String userId) {
-				testUser.userId = userId;
-				return this;
-			}
-
-			public TestUser build() {
-				return testUser;
-			}
-		}
-			
-		private TestUser testUser1 = new TestUserBuilder()
-			.setName("TestUser")
-			.setFamily("-")
-			.setUsername("testUser")
-			.setPassword("12341234")
-			.setEmail("mm49307@gmail.com")
-			.setUserId("58c188f8e4b09a3f67c63fbc")
-			.build();
-		
-		private static TestUser testUser2 = new TestUserBuilder()
-			.setName("TestUser2")
-			.setFamily("-")
-			.setUsername("testUser2")
-			.setPassword("12341234")
-			.setEmail("mm493072@gmail.com")
-			.setUserId("58a1d423e4b09c2c6a51de27")
-			.build();
-
+						
+		private TestUser testUser1 = new TestUser {
+			name = "TestUser",
+			family = "-",
+			username = "testUser",
+			password = "12341234",
+			email = "mm49307@gmail.com",
+			userId = "593d6888e4b0c8960312d7b4"
+		};
+				
+		private static TestUser testUser2 = new TestUser {
+			name = "TestUser2",
+			family = "-",
+			username = "testUser2",
+			password = "12341234",
+			email = "mm493072@gmail.com",
+			userId = "593d68c5e4b044a0bab405aa"
+		};
 
 		internal Action<IBacktoryResponse<T>> PrintCallBack<T> ()
 		{

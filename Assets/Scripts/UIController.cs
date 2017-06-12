@@ -10,16 +10,10 @@ public class UIController : MonoBehaviour {
 	public RectTransform authPanel;
 	public RectTransform realtimeTab;
 
-	// Use this for initialization
 	void Start () {
 		currentTab = authTab;
 		makeTabSelected(authTab);
 		authPanel.GetComponent<RectTransform> ().SetAsLastSibling ();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
 	}
 
 	private RectTransform currentTab;

@@ -8,7 +8,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 161251863, guid: 3555c99d6e995e34ca65a5c6168bb574, type: 3}
+  m_Script: {fileID: 1477974440, guid: 89dd5ad043b4e0e428b824a651fa875a, type: 3}
   m_Name: BacktorySettings
   m_EditorClassIdentifier: 
   _backtoryAuthId: 575d1432e4b099f61fd535cd
@@ -18,3 +18,6 @@ MonoBehaviour:
   _backtoryConnectivityId: 57fb6c32e4b064683efcbfa8
   _backtoryObjectStorageId: 575d1432e4b099f61fd535cf
   _backtoryFileStorageId: 578df3c9e4b0ca538f290810
+  _sdkDebugMode: 1
+  _logLevel: 3
+  _serverDestination: 0
