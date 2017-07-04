@@ -499,7 +499,7 @@
       <summary>
              The BacktoryQuery class defines a query that is used to fetch BacktoryObjects. The
              most common use case is finding all objects that match a query through the
-             <see cref="!:FindAsync()" /> method.
+             <see cref="M:Backtory.Core.Public.BacktoryQuery.FindInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{System.Collections.Generic.IList{Backtory.Core.Public.BacktoryObject}}})" /> method.
              </summary>
       <example>
              This sample code fetches all objects of
@@ -511,7 +511,7 @@
              </code>
             
              A BacktoryQuery can also be used to retrieve a single object whose id is known,
-             through the <see cref="!:GetAsync(string)" /> method. For example, this sample code
+             through the <see cref="M:Backtory.Core.Public.BacktoryQuery.GetInBackground(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryObject}})" /> method. For example, this sample code
              fetches an object of class <c>"MyClass"</c> and id <c>myId</c>.
             
              <code>
@@ -832,6 +832,11 @@
     <member name="F:Backtory.Core.Public.BacktoryChallengeFailureCause.Impossible">
       <summary>
             Even if you accept the challenge, number of players for forming the challenge won't be enough and thus challenge is impossible to form.
+            </summary>
+    </member>
+    <member name="F:Backtory.Core.Public.BacktoryChallengeFailureCause.Canceled">
+      <summary>
+            Creator of challenge canceled it.
             </summary>
     </member>
     <member name="T:Backtory.Core.Public.EventNameAttribute">
@@ -1281,7 +1286,7 @@
     <member name="M:Backtory.Core.Public.BacktoryFile.Rename(System.String,System.String)">
       <summary>
             Renames a file on backtory server synchronously. You <b>cannot</b> rename a folder!
-            <para>Typically, you should use <see cref="!:RenameInBackground(string, Action&lt;IBacktoryResponse&lt;string&gt;&gt;)" />
+            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryFile.RenameInBackground(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})" />
             instead of this, unless you are managing your own threading.</para></summary>
       <param name="newName">New name for this file. Cannot contain certain characters like ' '.</param>
       <returns>Result of this operation as a <c>IBacktoryResponse</c>. If successful, the response contains
@@ -1291,7 +1296,7 @@
     <member name="M:Backtory.Core.Public.BacktoryFile.RenameInBackground(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})">
       <summary>
             Renames a file on Backtory server in background. You <b>cannot</b> rename a folder!
-            <para>This is preferable to using <see cref="!:Rename(string)" />, unless your code is already
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryFile.Rename(System.String,System.String)" />, unless your code is already
             running from a background thread.</para></summary>
       <param name="newName">New name for this file. Cannot contain certain characters like ' '.</param>
       <param name="callback">A method to execute with the result of this operation as a <c>IBacktoryResponse</c>.
@@ -1305,7 +1310,7 @@
             Deletes this resource (file or folder) from server synchronously. 
             <para>Typically, you should use <see cref="!:DeleteInBackground(bool, Action&lt;IBacktoryResponse&gt;)" />
             instead of this, unless you are managing your own threading.</para></summary>
-      <param name="deleteContentsIfFolder">If true and this is a folder, will delete the folder along the all subfile/sub-folders</param>
+      <param name="deleteFolderIfNotEmpty">If true and this is a folder, will delete the folder along the all subfile/sub-folders</param>
       <returns>Result of this operation as a <c>IBacktoryResponse</c>.</returns>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryFile.DeleteInBackground(System.String,System.Boolean,System.Action{Backtory.Core.Public.IBacktoryResponse})">
@@ -1313,7 +1318,7 @@
             Deletes this resource (file or folder) from server in background.
             <para>Typically, you should use <see cref="!:RenameInBackground(string, Action&lt;IBacktoryResponse&lt;string&gt;&gt;)" />
             instead of this, unless you are managing your own threading.</para></summary>
-      <param name="deleteContentsIfFolder">If true and this is a folder, will delete the folder along the all subfile/sub-folders</param>
+      <param name="deleteFolderIfNotEmpty">If true and this is a folder, will delete the folder along the all subfile/sub-folders</param>
       <param name="callback">A method to execute with the result of this operation as a <c>IBacktoryResponse</c>.</param>
     </member>
     <member name="T:Backtory.Core.Public.BacktoryGameEvent">
@@ -1554,11 +1559,11 @@
     </member>
     <member name="M:Backtory.Core.Public.BacktoryChallenge.#ctor(System.String)">
       <summary>
-            For challenging other players use <see cref="!:CreateNew(IList&lt;string&gt;, int, int, Action&lt;IBacktoryResponse&lt;BacktoryChallenge&gt;&gt;)" /></summary>
+            For challenging other players use <see cref="M:Backtory.Core.Public.BacktoryChallenge.CreateNew(System.Collections.Generic.IList{System.String},System.Int32,System.Int32,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryChallenge}},System.String,System.String,System.String)" /></summary>
       <param name="challengeId">
       </param>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryChallenge.CreateNew(System.Collections.Generic.IList{System.String},System.Int32,System.Int32,System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryChallenge}})">
+    <member name="M:Backtory.Core.Public.BacktoryChallenge.CreateNew(System.Collections.Generic.IList{System.String},System.Int32,System.Int32,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryChallenge}},System.String,System.String,System.String)">
       <summary>
             Sends challenge requests for given userIds
             </summary>
@@ -1567,6 +1572,21 @@
       <param name="expirationTime">Life span of challenge in seconds. Note that maximum for this number is 15 minutes (900 seconds).</param>
       <param name="callback">
       </param>
+    </member>
+    <member name="T:Backtory.Core.Public.BacktoryMatch">
+      <summary>
+            A BacktoryMatch is a bunch of players set to begin a realtime game. They are matched either from a matchmaking or challenge.
+            This class contains result data of the corresponding matchmaking or challenge and is needed for starting a <seealso cref="T:Backtory.Core.Public.BacktoryRealtimeGame" /></summary>
+    </member>
+    <member name="F:Backtory.Core.Public.BacktoryMatch.MatchParticipants">
+      <summary>
+            UserIds of players participating this match.
+            </summary>
+    </member>
+    <member name="F:Backtory.Core.Public.BacktoryMatch.ExtraMessage">
+      <summary>
+            Filled by Webhooks. Arbitrary string
+            </summary>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryMatchMaking.Request(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
       <summary>

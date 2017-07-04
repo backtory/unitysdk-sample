@@ -60,7 +60,6 @@ namespace Assets.BacktorySample
 		// Update is called once per frame
 		void Update ()
 		{
-
 		}
 
 		#region click listeners
@@ -118,6 +117,17 @@ namespace Assets.BacktorySample
 			}
 			BacktoryUser.CurrentUser.ChangePasswordInBackground (passwordInput.text, newPasswordInput.text, changePassResponse => {
 				ResultText.text = changePassResponse.Successful ? "Change password succeeded." : "failed; " + changePassResponse.Message;
+			});
+		}
+
+		public void onForgetPassword ()
+		{
+			if (usernameInput.text == "") {
+				ResultText.text = "Enter username!";
+				return;
+			}
+			BacktoryUser.ForgotPasswordInBackground (usernameInput.text, response => {
+				ResultText.text = response.Successful ? "Forgot password succeeded." : "failed; " + response.Message;
 			});
 		}
 
@@ -408,7 +418,8 @@ namespace Assets.BacktorySample
 				invitedChallenge = challenge;
 			});
 			BacktoryChallenge.SetOnChallengeFailedListener((message) => {
-				MessageText.text = "Challenge failed!\n" + JsonConvert.SerializeObject (message.Cause, Formatting.Indented, JsonnetSetting ());
+				MessageText.text = "Challenge failed!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+				invitedChallenge = null;
 			});
 			BacktoryChallenge.SetOnChallengeAcceptedListener((message) => {
 				MessageText.text = "Challenge accepted!\n" + JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
@@ -419,7 +430,7 @@ namespace Assets.BacktorySample
 			BacktoryChallenge.SetOnChallengeReadyListener((match) => {
 				MessageText.text = "Challenge is ready!\n" + JsonConvert.SerializeObject (match, Formatting.Indented, JsonnetSetting ());
 				setupRealtimeGame(match);
-			});		
+			});
 		}
 
 		BacktoryChallenge requestedChallenge;
@@ -437,15 +448,14 @@ namespace Assets.BacktorySample
 				challengedUsers.Add (testUser1.userId);
 			}
 
-			BacktoryChallenge.CreateNew(challengedUsers, 2, 25, "challengeName", "metaData",
-				(response) => {
+			BacktoryChallenge.CreateNew(challengedUsers, 2, 25, (response) => {
 				if (response.Successful) {
 					ResultText.text = "New challenge requested!\n" + JsonConvert.SerializeObject (response.Body, Formatting.Indented, JsonnetSetting ());
 					requestedChallenge = response.Body;
 				} else {
 					ResultText.text = response.Message;
 				}
-			});
+			}, "challengeName", "metaData");
 		}
 
 		public void cancelChallenge() {
@@ -681,7 +691,7 @@ namespace Assets.BacktorySample
 
 		public void requestMembersList() {
 			var bgc = new BacktoryChat.Group (myGroupId);
-			bgc.MembersInfo (PrintCallBack<IList<BacktoryGroupMember>>());
+			bgc.MembersInfo (PrintCallBack<IList<BacktoryGroupMemberInfo>>());
 		}
 
 		public void addGroupMember() {
