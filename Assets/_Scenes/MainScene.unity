@@ -7175,7 +7175,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2106121528}
-        m_MethodName: onGetPlayerRank
+        m_MethodName: onSendEvent
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

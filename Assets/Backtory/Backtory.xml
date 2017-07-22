@@ -356,6 +356,26 @@
             just taking a new value, it takes a BacktoryFieldOperation that modifies the value.
             </summary>
     </member>
+    <member name="M:Backtory.Core.Public.BacktoryObject.Increment(System.String)">
+      <summary>
+            Atomically increments the given key by 1.
+            </summary>
+      <param name="key">The key to increment.</param>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryObject.Increment(System.String,System.Int64)">
+      <summary>
+            Atomically increments the given key by the given number.
+            </summary>
+      <param name="key">The key to increment.</param>
+      <param name="amount">The amount to increment by.</param>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryObject.Increment(System.String,System.Double)">
+      <summary>
+            Atomically increments the given key by the given number.
+            </summary>
+      <param name="key">The key to increment.</param>
+      <param name="amount">The amount to increment by.</param>
+    </member>
     <member name="M:Backtory.Core.Public.BacktoryObject.Remove(System.String)">
       <summary>
             Removes a key from the object's data if it exists.
@@ -769,6 +789,13 @@
             Retrieves a list of BacktoryObjects that satisfy this query from Backtory.
             </summary>
       <returns>The list of BacktoryObjects that match this query.</returns>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryQuery.GetInBackground(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryObject}})">
+      <summary>
+            Retrieve the row with passed id. returns error if row with this id doesn't exists in database.
+            </summary>
+      <param name="objectId">Primary key of the row you want to retrieve</param>
+      <param name="callback">An action to be execute upon receiving the server response</param>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryQuery.Equals(System.Object)">
       <summary>

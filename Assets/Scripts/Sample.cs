@@ -188,24 +188,27 @@ namespace Assets.BacktorySample
 		 */
 		public void onSendEvent ()
 		{
-			new GameOverEvent (int.Parse(CoinInput.text), int.Parse(TimeInput.text)).SendInBackground (response =>
-				ResultText.text = response.Successful ? "Sending event succeeded." : "failed; " + response.Message
-			);
+			new GameOverEvent (int.Parse(CoinInput.text), int.Parse(TimeInput.text)).SendInBackground (response => {
+				ResultText.text = response.Successful ? "Sending event succeeded." : "failed; " + response.Message;
+			});
 		}
 			
 		public void onGetPlayerRank ()
 		{
-			new TopPlayersLeaderBoard ().GetPlayerRankInBackground (PrintCallBack<BacktoryLeaderBoard.LeaderBoardRank> ());
+			new TopPlayersLeaderBoard ().GetPlayerRankInBackground (
+				PrintCallBack<BacktoryLeaderBoard.LeaderBoardRank> ());
 		}
 
 		public void onGetTopPlayers ()
 		{
-			new TopPlayersLeaderBoard ().GetTopPlayersInBackground (2, PrintCallBack<BacktoryLeaderBoard.LeaderBoardResponse> ());
+			new TopPlayersLeaderBoard ().GetTopPlayersInBackground (2, 
+				PrintCallBack<BacktoryLeaderBoard.LeaderBoardResponse> ());
 		}
 
 		public void onAroundMePlayers ()
 		{
-			new TopPlayersLeaderBoard ().GetPlayersAroundMeInBackground (2, PrintCallBack<BacktoryLeaderBoard.LeaderBoardResponse> ());
+			new TopPlayersLeaderBoard ().GetPlayersAroundMeInBackground (2,
+				PrintCallBack<BacktoryLeaderBoard.LeaderBoardResponse> ());
 		}
 
 
