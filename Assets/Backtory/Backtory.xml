@@ -335,6 +335,20 @@
             Gets the name of the field represented by this property.
             </summary>
     </member>
+    <member name="M:Backtory.Core.Public.BacktoryObject.SaveInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})">
+      <summary>
+            Create a new record with this object's data. If already saved (ObjectId property existed), updates the changed fields on server.
+            </summary>
+      <param name="callback">An action executed when server response is received.</param>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryObject.DeleteInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})">
+      <summary>
+            Deletes this object from server. (A row with matching ObjectId).
+            </summary>
+      <seealso cref="P:Backtory.Core.Public.BacktoryObject.ObjectId" />
+      <param name="callback">
+      </param>
+    </member>
     <member name="M:Backtory.Core.Public.BacktoryObject.StartSave">
       <summary>
             Pushes new operations onto the queue and returns the current set of operations.
@@ -342,10 +356,17 @@
     </member>
     <member name="M:Backtory.Core.Public.BacktoryObject.Revert">
       <summary>
-            Clears any changes to this object made since the last call to <see cref="!:SaveAsync()" />.
+            Clears any changes to this object made since the last save.
             </summary>
     </member>
-    <member name="M:Backtory.Core.Public.BacktoryObject.RebuildEstimatedData">
+    <member name="M:Backtory.Core.Public.BacktoryObject.Revert(System.String)">
+      <summary>
+            Clears any change on a field since the last save.
+            </summary>
+      <param name="key">
+      </param>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryObject.RebuildLocalData">
       <summary>
             Regenerates the estimatedData map from the serverData and operations.
             </summary>
@@ -388,10 +409,10 @@
             already has a value.
             </summary>
       <remarks>
-            This allows you to use collection initialization syntax when creating ParseObjects,
+            This allows you to use collection initialization syntax when creating BacktoryObjects,
             such as:
             <code>
-            var obj = new ParseObject("MyType")
+            var obj = new BacktoryObject("MyType")
             {
                 {"name", "foo"},
                 {"count", 10},
@@ -449,7 +470,7 @@
     </member>
     <member name="M:Backtory.Core.Public.BacktoryObject.SetProperty``1(``0,System.String)">
       <summary>
-            Sets the value of a property based upon its associated ParseFieldName attribute.
+            Sets the value of a property based upon its associated BacktoryFieldName attribute.
             </summary>
       <param name="value">The new value.</param>
       <param name="propertyName">The name of the property.</param>
@@ -457,7 +478,7 @@
     </member>
     <member name="M:Backtory.Core.Public.BacktoryObject.GetProperty``1(System.String)">
       <summary>
-            Gets the value of a property based upon its associated ParseFieldName attribute.
+            Gets the value of a property based upon its associated BacktoryFieldName attribute.
             </summary>
       <returns>The value of the property.</returns>
       <param name="propertyName">The name of the property.</param>
@@ -465,21 +486,21 @@
     </member>
     <member name="M:Backtory.Core.Public.BacktoryObject.GetProperty``1(``0,System.String)">
       <summary>
-            Gets the value of a property based upon its associated ParseFieldName attribute.
+            Gets the value of a property based upon its associated BacktoryFieldName attribute.
             </summary>
       <returns>The value of the property.</returns>
-      <param name="defaultValue">The value to return if the property is not present on the ParseObject.</param>
+      <param name="defaultValue">The value to return if the property is not present on the BacktoryObject.</param>
       <param name="propertyName">The name of the property.</param>
       <typeparam name="T">The return type of the property.</typeparam>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryObject.HasChanges">
       <summary>
-            Indicates whether this ParseObject has unsaved changes.
+            Indicates whether this BacktoryObject has unsaved changes.
             </summary>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryObject.IsKeyDirty(System.String)">
       <summary>
-            Indicates whether key is unsaved for this ParseObject.
+            Indicates whether key is unsaved for this BacktoryObject.
             </summary>
       <param name="key">The key to check for.</param>
       <returns>
@@ -488,7 +509,7 @@
     </member>
     <member name="P:Backtory.Core.Public.BacktoryObject.ACL">
       <summary>
-            Gets or sets the ParseACL governing this object.
+            Gets or sets the BacktoryACL governing this object.
             </summary>
     </member>
     <member name="P:Backtory.Core.Public.BacktoryObject.UpdatedAt">
@@ -512,7 +533,13 @@
     </member>
     <member name="P:Backtory.Core.Public.BacktoryObject.IsDirty">
       <summary>
-            Indicates whether this ParseObject has unsaved changes.
+            Indicates whether this BacktoryObject is not in sync with server. It could be either just created, 
+            </summary>
+    </member>
+    <member name="P:Backtory.Core.Public.BacktoryObject.Keys">
+      <summary>
+            Gets a set view of the keys contained in this object. This does not include createdAt,
+            updatedAt, or objectId. It does include things like username and ACL.
             </summary>
     </member>
     <member name="T:Backtory.Core.Public.BacktoryQuery">
@@ -606,6 +633,15 @@
              or <see cref="M:Backtory.Core.Public.BacktoryQuery.OrderByDescending(System.String)" /> on this query.
              </summary>
       <param name="key">The key to order by.</param>
+      <returns>A new query with the additional constraint.</returns>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryQuery.Select(System.String)">
+      <summary>
+            Restrict the fields of returned BacktoryObjects to only include the provided key.
+            If this is called multiple times, then all of the keys specified in each of
+            the calls will be included.
+            </summary>
+      <param name="key">The key that should be included.</param>
       <returns>A new query with the additional constraint.</returns>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryQuery.Skip(System.Int32)">
@@ -847,7 +883,7 @@
     </member>
     <member name="F:Backtory.Core.Public.BacktoryChallengeFailureCause.Expired">
       <summary>
-            Duration set in <see cref="!:ChallengeRequest.ChallengeRequest(IList&lt;string&gt;, int, int, Action&lt;IBacktoryResponse&lt;BacktoryChallengeResponse&gt;&gt;)" />
+            Duration set in <see cref="M:Backtory.Core.Internal.ChallengeRequest.#ctor(System.Collections.Generic.IList{System.String},System.Int32,System.Int32,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryChallengeResponse}},System.String,System.String,System.String)" />
             throu 'WaitTime' parameter has passed
             </summary>
     </member>
@@ -1160,7 +1196,7 @@
     </member>
     <member name="T:Backtory.Core.Public.BacktoryClient">
       <summary>
-            Entry point for using Backtory SDK. Before starting to use SDK features, first call <see cref="!:Init(KeysConfiguration, string)" /></summary>
+            Entry point for using Backtory SDK. Before starting to use SDK features, first call <see cref="M:Backtory.Core.Public.BacktoryClient.Init(Backtory.Core.Public.KeysConfiguration,System.String,System.String,System.String)" /></summary>
     </member>
     <member name="F:Backtory.Core.Public.BacktoryClient.SdkVersion">
       <summary>
@@ -1173,8 +1209,27 @@
             </summary>
       <param name="keysConf">Includes the Backtory API key for parts of backtory you want to use. For example if you want to use 
             game and leaderboard services, you must set your game ID in this object.</param>
-      <param name="storageAddress">
-      </param>
+      <param name="storageAddress">You could supply custom path for </param>
+      <param name="restAddress">Base address for all HTTP or HTTPS requests.</param>
+      <param name="connectivityAddress">Base address for websocket requests.</param>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryClient.StartRealtimeService(Backtory.Core.Public.BacktoryConnectionStatusListener)">
+      <summary>
+            Establish a websocket connection to backtory realtime service. A logged-in user is necessary.
+            </summary>
+      <param name="connectionListener">A listener for events occurred during the websocket's life</param>
+      <exception cref="T:System.InvalidOperationException">Throws if SDK doesn't have a logged-in user.</exception>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryClient.IsRealtimeServiceConnected">
+      <summary>
+            Shows if connection to Backtory realtime service is active and healthy.
+            </summary>
+      <returns>True if a connection exists.</returns>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryClient.StopRealtimeService">
+      <summary>
+            Terminates the connection to Backtory realtime. 
+            </summary>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryClient.SetOnErrorListener(System.Action{Backtory.Core.Public.BacktoryErrorMessage})">
       <summary>
@@ -1578,10 +1633,10 @@
     </member>
     <member name="M:Backtory.Core.Public.BacktoryChallenge.SetOnChallengeInvitationListener(System.Action{Backtory.Core.Public.BacktoryChallenge})">
       <summary>
-            Tells the SDK what to do when an invitation to challenge come. In most of use cases the best place
+            Tells the SDK what to do when an invitation to challenge comes. In most of use cases the best place
             for calling this, is right after calling <see cref="M:Backtory.Core.Public.BacktoryClient.StartRealtimeService(Backtory.Core.Public.BacktoryConnectionStatusListener)" /></summary>
       <param name="onChallengeInvitation">An action, called when an invitation comes. On Unity it executes
-            on main thread so UI elements can be modified in it without problem.
+            on main thread so UI elements could be modified in it without problem.
             </param>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryChallenge.#ctor(System.String)">
@@ -1597,6 +1652,9 @@
       <param name="usersToChallenge">List of user ids to challenge</param>
       <param name="minPlayersToStart">If fewer players accept the challenge, challenge wont start</param>
       <param name="expirationTime">Life span of challenge in seconds. Note that maximum for this number is 15 minutes (900 seconds).</param>
+      <param name="challengeMessage">A welcome message for challenged users. Something like "catch me if you can! :DD"</param>
+      <param name="challengeName">A name for challenge which helps creating different types of challenge.</param>
+      <param name="metaData">An optional and arbitrary string which will be sent to challenge recipients. Good place for sending username, name, age etc.</param>
       <param name="callback">
       </param>
     </member>
@@ -1614,6 +1672,21 @@
       <summary>
             Filled by Webhooks. Arbitrary string
             </summary>
+    </member>
+    <member name="F:Backtory.Core.Public.BacktoryMatch.MatchRequestId">
+      <summary>
+      </summary>
+    </member>
+    <member name="M:Backtory.Core.Public.BacktoryMatch.#ctor(System.String,System.String,System.Collections.Generic.IList{Backtory.Core.Public.BacktoryMatchParticipant},System.String,System.String)">
+      <summary>
+            A BacktoryMatch represent a collection of backtory users, matched to play a game. 
+            It could be result of a matchmaking or challenge.
+            </summary>
+      <param name="address">Address of Backtory realtime websocket instance.</param>
+      <param name="matchId">A unique id for a match. Generated by the Backtory server.</param>
+      <param name="matchParticipants">A list of Backtory users matched to play a game.</param>
+      <param name="extraMessage">When using MatchFoundWebhook, this field would be the result of that webhook.</param>
+      <param name="matchRequestId">A unique id for which server assigns to matchmaking or challenge request.</param>
     </member>
     <member name="M:Backtory.Core.Public.BacktoryMatchMaking.Request(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
       <summary>
