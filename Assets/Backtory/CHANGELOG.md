@@ -1,5 +1,16 @@
 Change Log
 ==========
+## Version 0.6 *(1396/7/30)*
+* New: **In App Purchase!** Easily and securely purchase and consumes items from Cafe Bazaar.
+  See documents for setup guide. 
+* New: **Sample query.** Get random records matched to a query constrains.
+* New: Ability to add custom fields (limited to _string_ type) to `BacktoryUser` with `Put` method. 
+* New: You can now pass `true` to `RealtimeGame.SendGameEvent` method's second parameter to  
+  to ignore webhook call for this particular event.
+* Fix: Websocket not emptying queue before stop.
+* Fix: 404 on logouts.
+   
+
 ### Version 0.5.13 *(1396/7/23)*
 * New: **Count query.** Get just the number of rows matching the query.
 * New: Columns returned by a query could be limited using BacktoryQuery `Select` method. This helps using less traffic when all 

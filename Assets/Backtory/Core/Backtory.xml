@@ -1,0 +1,2248 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Backtory</name>
+    </assembly>
+    <members>
+        <member name="M:Backtory.Core.Internal.BacktoryWebSocket.#ctor(System.String,System.String,System.Action,System.Action,System.Action{System.String},System.Action{System.String})">
+            <summary>
+            
+            </summary>
+            <param name="serverUrl"></param>
+            <param name="websocketType">Useful for differentiating between connectivity and realtime log prints</param>
+            <param name="onOpen"></param>
+            <param name="onClose"></param>
+            <param name="onError"></param>
+            <param name="onMessage"></param>
+        </member>
+        <member name="M:Backtory.Core.Internal.BacktoryStompWebSocket.websocketClosed">
+            <summary>
+            Called when enclosed sockets is stopped.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Internal.BacktoryDeleteOperation">
+            <summary>
+            An operation where a field is deleted from the object.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Internal.IBacktoryFieldOperationFactory">
+            <summary>
+            A function that creates a ParseFieldOperation from a dictionary.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.BacktoryFieldOperations.RegisterDecoder(System.String,Backtory.Core.Internal.IBacktoryFieldOperationFactory)">
+            <summary>
+            Registers a single factory for a given __op field value.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.BacktoryFieldOperations.RegisterDefaultDecoders">
+            <summary>
+            Registers a list of default decoder functions that convert a dictionary with an __op field into
+            a ParseFieldOperation.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Internal.IBacktoryFieldOperation">
+            <summary>
+            A BacktoryFieldOperation represents a modification to a value in a BacktoryObject.
+            For example, setting, deleting, or incrementing a value are all different kinds of
+            BacktoryFieldOperations. BacktoryFieldOperations themselves can be considered to be
+            immutable.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.IBacktoryFieldOperation.Encode">
+            <summary>
+            Converts the BacktoryFieldOperation to a data structure that can be converted to JSON and sent to
+            Backtory as part of a save operation.
+            </summary>
+            <returns>An object to be JSONified.</returns>
+        </member>
+        <member name="M:Backtory.Core.Internal.IBacktoryFieldOperation.MergeWithPrevious(Backtory.Core.Internal.IBacktoryFieldOperation)">
+            <summary>
+            Returns a field operation that is composed of a previous operation followed by
+            this operation. This will not mutate either operation. However, it may return
+            <code>this</code> if the current operation is not affected by previous changes.
+            For example:
+              {increment by 2}.MergeWithPrevious({set to 5})       -> {set to 7}
+                    {set to 5}.MergeWithPrevious({increment by 2}) -> {set to 5}
+                   {add "foo"}.MergeWithPrevious({delete})         -> {set to ["foo"]}
+                      {delete}.MergeWithPrevious({add "foo"})      -> {delete}        /// </summary>
+            <param name="previous">The most recent operation on the field, or null if none.</param>
+            <returns>A new BacktoryFieldOperation or this.</returns>
+        </member>
+        <member name="M:Backtory.Core.Internal.IBacktoryFieldOperation.Apply(System.Object,System.String)">
+             <summary>
+             Returns a new estimated value based on a previous value and this operation. This
+             value is not intended to be sent to Backtory, but it is used locally on the client to
+             inspect the most likely current value for a field.
+            
+             The key and object are used solely for BacktoryRelation to be able to construct objects
+             that refer back to their parents.
+             </summary>
+             <param name="oldValue">The previous value for the field.</param>
+             <param name="key">The key that this value is for.</param>
+             <returns>The new value for the field.</returns>
+        </member>
+        <member name="T:Backtory.Core.Internal.FakeDispatcher">
+            <summary>
+            This class exist duo to bad architecture design. Unity needs dispatch system but somehow
+            Parse dotnet SDK doesn't use dispatcher concept in portable projects.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Internal.InternalExtensions">
+            <summary>
+            Provides helper methods that allow us to use terser code elsewhere.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Internal.IJSON">
+            <summary>
+            SDK heavily uses json. All modules needing json operations must take an implementation 
+            of this interface on their initialization. 
+            <para>Use <see cref="T:Backtory.Core.Internal.JsonFactory"/> for getting typical implementations.</para>
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.IJSON.FromJson``1(System.String)">
+            <summary>
+            Deserialize a Json string to a Java object
+            </summary>
+            <typeparam name="T">Type of Java object</typeparam>
+            <param name="jsonString"></param>
+            <returns>Java object representation of <paramref name="jsonString"/></returns>
+        </member>
+        <member name="M:Backtory.Core.Internal.IJSON.FromJson(System.String,System.Type)">
+            <summary>
+            Deserialize a Json string to a Java object
+            </summary>
+            <param name="jsonString"></param>
+            <param name="t">Type of Java object</param>
+            <returns>An <see cref="T:System.Object"/> which can be cast to class of <paramref name="t"/></returns>
+        </member>
+        <member name="M:Backtory.Core.Internal.IJSON.ToJson(System.Object,System.Boolean)">
+            <summary>
+            Converts the object to its Json representation
+            </summary>
+            <param name="obj">object to be converted to json string</param>
+            <param name="pretty">should this function returns the indented readable
+            json which will have bigger size.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Backtory.Core.Internal.BacktoryJNode.AsJsonArray">
+            <summary>
+            Use this for classes with default constructor
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.ConfigableJsonNet.FromJson(System.String,System.Type)">
+            <see cref="M:Backtory.Core.Internal.IJSON.FromJson(System.String,System.Type)"/>
+        </member>
+        <member name="M:Backtory.Core.Internal.ConfigableJsonNet.FromJson``1(System.String)">
+            <see cref="M:Backtory.Core.Internal.IJSON.ParseJson(System.String)"/>
+        </member>
+        <member name="M:Backtory.Core.Internal.ConfigableJsonNet.ToJson(System.Object,System.Boolean)">
+            <see cref="M:Backtory.Core.Internal.IJSON.ToJson(System.Object,System.Boolean)"/>
+        </member>
+        <member name="M:Backtory.Core.Internal.JsonFactory.getDefault">
+            <returns>Default IJSON implementation.</returns>
+        </member>
+        <member name="M:Backtory.Core.Internal.JsonFactory.getJsonNet(Newtonsoft.Json.JsonSerializerSettings)">
+            <param name="setting">Settings for controlling on serialization and deserialization</param>
+            <returns>An JsonNet implementation of <see cref="T:Backtory.Core.Internal.IJSON"/></returns>
+        </member>
+        <member name="T:Backtory.Core.Internal.MySerializer">
+            <summary>
+            Custom RestSharp serializer and deserializer which delegates it's methods to an IJSON implementation
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.RealtimeServiceSocket.IsSocketConnected">
+            <summary>
+            Determines that socket is connected and it's looper timer is enabled also
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Backtory.Core.Internal.JoinGlobalChatRequest">
+            <summary>
+            returns subscriptionId as response
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Internal.RestSharpRequest`1">
+            <summary>
+            Extending from RestSharp's <see cref="T:RestSharp.RestRequest"/> se we can use this in <see cref="T:Backtory.Core.Internal.RestSharpNetwork"/>
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.RestSharpNetwork.RetryWithNewToken(RestSharp.IRestRequest)">
+            <summary>
+            Tries to repeat the request with new access-token. Updates login data in 'Storage' if successful.
+            </summary>
+            <param name="req">Original request failing for expired access-token</param>
+            <returns>If being able to get a new access-token, returns the response of original request.
+            If not, returns the response of error encountered in process
+            </returns>
+        </member>
+        <member name="M:Backtory.Core.Internal.RestSharpNetwork.HandleExpiredRefreshToken(Backtory.Core.Public.BacktoryUser)">
+            <summary>
+            It's possible that getting new access-token fails with another 401, meaning Refresh-Token is also expired. (It was a two month period prior but now is 2 years)
+            If a guest user, tries to login with stored username and password to get a new Refresh-Token.
+            Refresh token got in the process stores in 'Storage' in enclosing <see cref="M:Backtory.Core.Internal.RestSharpNetwork.RetryWithNewToken(RestSharp.IRestRequest)"/> method
+            </summary>
+            <param name="currentUser">If guest, gets username and password from it and logins in backtory</param>
+            <returns></returns>
+        </member>
+        <member name="T:Backtory.Core.Internal.IStorage">
+            <summary>
+            An implementation of this class will be used by SDK for storing user data like current logged-in user and access-token
+            Note that the storage <b>must be persisting</b> (e.g. file, Unity playerPref).
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.IStorage.Put(System.String,System.String)">
+            <summary>
+            Stores a key-value in string format.
+            </summary>
+            <param name="key">Stores <paramref name="data"/> with this key. If another data with key
+            exists, data will be overridden.</param>
+            <param name="data">Arbitrary content in form of string.</param>
+        </member>
+        <member name="M:Backtory.Core.Internal.IStorage.Get(System.String)">
+            <summary>
+            Gets the values associated to <paramref name="key"/>
+            </summary>
+            <param name="key">Key, uniquely identifying a data in <c>Storage</c></param>
+            <returns>Data associated with <paramref name="key"/></returns>
+        </member>
+        <member name="M:Backtory.Core.Internal.IStorage.Remove(System.String)">
+            <summary>
+            Remove the value associated to <paramref name="key"/>
+            </summary>
+            <param name="key">Key, uniquely identifying a data in <c>Storage</c></param>
+        </member>
+        <member name="M:Backtory.Core.Internal.IStorage.Clear">
+            <summary>
+            Clears everything in storage. All user info will be lost after this and user must login again.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Internal.Timber">
+            <summary>
+            Logging for lazy people.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Log(Backtory.Core.Internal.LogLevel,System.String,System.Object[])">
+            <summary>
+            Log at <c>priority</c> a message with optional format args.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Log(Backtory.Core.Internal.LogLevel,System.Exception,System.String,System.Object[])">
+            <summary>
+            Log at {@code priority} an exception and a message with optional format args.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Log(Backtory.Core.Internal.LogLevel,System.Exception)">
+            <summary>
+            Log at {@code priority} an exception.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.AsTree">
+            <summary>
+            A view into Timber's planted trees as a tree itself. This can be used for injecting a logger 
+            instance rather than using static methods or to facilitate testing.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Tag(System.String)">
+            <summary>
+            Set a one-time tag for use on the next logging call.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Plant(Backtory.Core.Internal.Timber.Tree)">
+            <summary>
+             Add a new logging tree.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Plant(Backtory.Core.Internal.Timber.Tree[])">
+            <summary>
+            Adds new logging trees.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Uproot(Backtory.Core.Internal.Timber.Tree)">
+            <summary>
+            Remove a planted tree.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.UprootAll">
+            <summary>
+            Remove all planted trees.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Forest">
+            <summary>
+            Return a copy of all planted <see cref="T:Backtory.Core.Internal.Timber.Tree">trees</see>.
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Internal.Timber.TREE_OF_SOULS">
+            A {@link Tree} that delegates to all planted trees in the {@linkplain #FOREST forest}. 
+        </member>
+        <member name="T:Backtory.Core.Internal.Timber.Tree">
+            A facade for handling logging calls. Install instances via {@link #plant Timber.plant()}. 
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Tree.Log(Backtory.Core.Internal.LogLevel,System.String,System.Object[])">
+            <summary>
+            Log at <c>priority</c> a message with optional format args.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Tree.Log(Backtory.Core.Internal.LogLevel,System.Exception,System.String,System.Object[])">
+            <summary>
+            Log at {@code priority} an exception and a message with optional format args.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Tree.Log(Backtory.Core.Internal.LogLevel,System.Exception)">
+            <summary>
+            Log at {@code priority} an exception.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Tree.IsLoggable(System.String,Backtory.Core.Internal.LogLevel)">
+            <summary>
+            Return whether a message at <c>priority</c> or <c>tag</c> should be logged.
+            </summary>
+            <param name="tag"></param>
+            <param name="priority"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Tree.FormatMessage(System.String,System.Object[])">
+            <summary>
+            Formats a log message with optional arguments.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.Timber.Tree.Log(Backtory.Core.Internal.LogLevel,System.String,System.String,System.Exception)">
+            <summary>
+            Write a log message to its destination. Called for all level-specific methods by default.
+            </summary>
+            <param name="priority">Log level. See <see cref="T:Backtory.Core.Internal.LogLevel"/>for constants.</param>
+            <param name="tag">Explicit or inferred tag. May be <c>null</c>.</param>
+            <param name="message">Formatted log message. May be <c>null</c>, but then <c>t</c> will not be.</param>
+            <param name="t">Accompanying exceptions. May be <c>null</c>, but then <c>message</c> will not be.</param>
+        </member>
+        <member name="T:Backtory.Core.Internal.UnitySingleton`1">
+            <summary>
+            Be aware this will not prevent a non singleton constructor
+              such as T myT = new T();
+            To prevent that, add protected T () {} to your singleton class.
+            
+            As a note, this is made as MonoBehaviour because we need Coroutines.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Internal.UnitySingleton`1.OnDestroy">
+            <summary>
+            When Unity quits, it destroys objects in a random order.
+            In principle, a Singleton is only destroyed when application quits.
+            If any script calls Instance after it have been destroyed, 
+              it will create a buggy ghost object that will stay on the Editor scene
+              even after stopping playing the Application. Really bad!
+            So, this was made to be sure we're not creating that buggy ghost object.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.#ctor">
+            <summary>
+            Creates an ACL with no permissions granted.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.#ctor(Backtory.Core.Public.BacktoryUser)">
+            <summary>
+            Creates an ACL where only the provided user has access.
+            </summary>
+            <param name="owner">The only user that can read or write objects governed by this ACL.</param>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryACL.PublicReadAccess">
+            <summary>
+            Gets or sets whether the public is allowed to read this object.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryACL.PublicWriteAccess">
+            <summary>
+            Gets or sets whether the public is allowed to write this object.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.SetReadAccess(System.String,System.Boolean)">
+            <summary>
+            Sets whether the given user id is allowed to read this object.
+            </summary>
+            <param name="userId">The objectId of the user.</param>
+            <param name="allowed">Whether the user has permission.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.SetReadAccess(Backtory.Core.Public.BacktoryUser,System.Boolean)">
+            <summary>
+            Sets whether the given user is allowed to read this object.
+            </summary>
+            <param name="user">The user.</param>
+            <param name="allowed">Whether the user has permission.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.SetWriteAccess(System.String,System.Boolean)">
+            <summary>
+            Sets whether the given user id is allowed to write this object.
+            </summary>
+            <param name="userId">The objectId of the user.</param>
+            <param name="allowed">Whether the user has permission.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.SetWriteAccess(Backtory.Core.Public.BacktoryUser,System.Boolean)">
+            <summary>
+            Sets whether the given user is allowed to write this object.
+            </summary>
+            <param name="user">The user.</param>
+            <param name="allowed">Whether the user has permission.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.GetReadAccess(System.String)">
+            <summary>
+            Gets whether the given user id is *explicitly* allowed to read this object.
+            Even if this returns false, the user may still be able to read it if
+            PublicReadAccess is true or a role that the user belongs to has read access.
+            </summary>
+            <param name="userId">The user objectId to check.</param>
+            <returns>Whether the user has access.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.GetReadAccess(Backtory.Core.Public.BacktoryUser)">
+            <summary>
+            Gets whether the given user is *explicitly* allowed to read this object.
+            Even if this returns false, the user may still be able to read it if
+            PublicReadAccess is true or a role that the user belongs to has read access.
+            </summary>
+            <param name="user">The user to check.</param>
+            <returns>Whether the user has access.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.GetWriteAccess(System.String)">
+            <summary>
+            Gets whether the given user id is *explicitly* allowed to write this object.
+            Even if this returns false, the user may still be able to write it if
+            PublicReadAccess is true or a role that the user belongs to has write access.
+            </summary>
+            <param name="userId">The user objectId to check.</param>
+            <returns>Whether the user has access.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.GetWriteAccess(Backtory.Core.Public.BacktoryUser)">
+            <summary>
+            Gets whether the given user is *explicitly* allowed to write this object.
+            Even if this returns false, the user may still be able to write it if
+            PublicReadAccess is true or a role that the user belongs to has write access.
+            </summary>
+            <param name="user">The user to check.</param>
+            <returns>Whether the user has access.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.SetRoleReadAccess(System.String,System.Boolean)">
+            <summary>
+            Sets whether users belonging to the role with the given <paramref name="roleName"/>
+            are allowed to read this object.
+            </summary>
+            <param name="roleName">The name of the role.</param>
+            <param name="allowed">Whether the role has access.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.SetRoleReadAccess(Backtory.Core.Public.BacktoryRole,System.Boolean)">
+            <summary>
+            Sets whether users belonging to the given role are allowed to read this object.
+            </summary>
+            <param name="role">The role.</param>
+            <param name="allowed">Whether the role has access.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.GetRoleReadAccess(System.String)">
+            <summary>
+            Gets whether users belonging to the role with the given <paramref name="roleName"/>
+            are allowed to read this object. Even if this returns false, the role may still be
+            able to read it if a parent role has read access.
+            </summary>
+            <param name="roleName">The name of the role.</param>
+            <returns>Whether the role has access.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.GetRoleReadAccess(Backtory.Core.Public.BacktoryRole)">
+            <summary>
+            Gets whether users belonging to the role are allowed to read this object.
+            Even if this returns false, the role may still be able to read it if a
+            parent role has read access.
+            </summary>
+            <param name="role">The name of the role.</param>
+            <returns>Whether the role has access.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.SetRoleWriteAccess(System.String,System.Boolean)">
+            <summary>
+            Sets whether users belonging to the role with the given <paramref name="roleName"/>
+            are allowed to write this object.
+            </summary>
+            <param name="roleName">The name of the role.</param>
+            <param name="allowed">Whether the role has access.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.SetRoleWriteAccess(Backtory.Core.Public.BacktoryRole,System.Boolean)">
+            <summary>
+            Sets whether users belonging to the given role are allowed to write this object.
+            </summary>
+            <param name="role">The role.</param>
+            <param name="allowed">Whether the role has access.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.GetRoleWriteAccess(System.String)">
+            <summary>
+            Gets whether users belonging to the role with the given <paramref name="roleName"/>
+            are allowed to write this object. Even if this returns false, the role may still be
+            able to write it if a parent role has write access.
+            </summary>
+            <param name="roleName">The name of the role.</param>
+            <returns>Whether the role has access.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryACL.GetRoleWriteAccess(Backtory.Core.Public.BacktoryRole)">
+            <summary>
+            Gets whether users belonging to the role are allowed to write this object.
+            Even if this returns false, the role may still be able to write it if a
+            parent role has write access.
+            </summary>
+            <param name="role">The name of the role.</param>
+            <returns>Whether the role has access.</returns>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryFieldNameAttribute">
+            <summary>
+            Specifies a field name for a property on a BacktoryObject subclass.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryFieldNameAttribute.#ctor(System.String)">
+            <summary>
+            Constructs a new BacktoryFieldName attribute.
+            </summary>
+            <param name="fieldName">The name of the field on the BacktoryObject that the
+            property represents.</param>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryFieldNameAttribute.FieldName">
+            <summary>
+            Gets the name of the field represented by this property.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.SaveInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Create a new record with this object's data. If already saved (ObjectId property existed), updates the changed fields on server.
+            </summary>
+            <param name="callback">An action executed when server response is received.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.DeleteInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Deletes this object from server. (A row with matching ObjectId).
+            </summary>
+            <seealso cref="P:Backtory.Core.Public.BacktoryObject.ObjectId"/>
+            <param name="callback"></param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.StartSave">
+            <summary>
+            Pushes new operations onto the queue and returns the current set of operations.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.Revert">
+            <summary>
+            Clears any changes to this object made since the last save.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.Revert(System.String)">
+            <summary>
+            Clears any change on a field since the last save.
+            </summary>
+            <param name="key"></param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.RebuildLocalData">
+            <summary>
+            Regenerates the estimatedData map from the serverData and operations.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.PerformOperation(System.String,Backtory.Core.Internal.IBacktoryFieldOperation)">
+            <summary>
+            PerformOperation is like setting a value at an index, but instead of
+            just taking a new value, it takes a BacktoryFieldOperation that modifies the value.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.Increment(System.String)">
+            <summary>
+            Atomically increments the given key by 1.
+            </summary>
+            <param name="key">The key to increment.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.Increment(System.String,System.Int64)">
+            <summary>
+            Atomically increments the given key by the given number.
+            </summary>
+            <param name="key">The key to increment.</param>
+            <param name="amount">The amount to increment by.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.Increment(System.String,System.Double)">
+            <summary>
+            Atomically increments the given key by the given number.
+            </summary>
+            <param name="key">The key to increment.</param>
+            <param name="amount">The amount to increment by.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.Remove(System.String)">
+            <summary>
+            Removes a key from the object's data if it exists.
+            </summary>
+            <param name="key">The key to remove.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.Add(System.String,System.Object)">
+            <summary>
+            Adds a value for the given key, throwing an Exception if the key
+            already has a value.
+            </summary>
+            <remarks>
+            This allows you to use collection initialization syntax when creating BacktoryObjects,
+            such as:
+            <code>
+            var obj = new BacktoryObject("MyType")
+            {
+                {"name", "foo"},
+                {"count", 10},
+                {"found", false}
+            };
+            </code>
+            </remarks>
+            <param name="key">The key for which a value should be set.</param>
+            <param name="value">The value for the key.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.AddToList(System.String,System.Object)">
+            <summary>
+            Atomically adds an object to the end of the list associated with the given key.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="value">The object to add.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.AddRangeToList``1(System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Atomically adds objects to the end of the list associated with the given key.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="values">The objects to add.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.AddUniqueToList(System.String,System.Object)">
+            <summary>
+            Atomically adds an object to the end of the list associated with the given key,
+            only if it is not already present in the list. The position of the insert is not
+            guaranteed.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="value">The object to add.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.AddRangeUniqueToList``1(System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Atomically adds objects to the end of the list associated with the given key,
+            only if they are not already present in the list. The position of the inserts are not
+            guaranteed.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="values">The objects to add.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.RemoveAllFromList``1(System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Atomically removes all instances of the objects in <paramref name="values"/>
+            from the list associated with the given key.
+            </summary>
+            <param name="key">The key.</param>
+            <param name="values">The objects to remove.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.SetObjectIdInternal(System.String)">
+            <summary>
+            Sets the objectId without marking dirty.
+            </summary>
+            <param name="objectId">The new objectId</param>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryObject.ACL">
+            <summary>
+            Gets or sets the BacktoryACL governing this object.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryObject.UpdatedAt">
+            <summary>
+            Gets the last time this object was updated as the server sees it, so that if you make changes
+            to a BacktoryObject, then wait a while, and then call 
+            <see cref="M:Backtory.Core.Public.BacktoryObject.SaveInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})"/>, the updated time
+            will be the time of the <see cref="M:Backtory.Core.Public.BacktoryObject.SaveInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})"/> 
+            call rather than the time the object was changed locally.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryObject.CreatedAt">
+            <summary>
+            Gets the first time this object was saved as the server sees it, so that if 
+            you create a BacktoryObject, then wait a while, and then call 
+            <see cref="M:Backtory.Core.Public.BacktoryObject.SaveInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})"/>, the
+            creation time will be the time of the first 
+            <see cref="M:Backtory.Core.Public.BacktoryObject.SaveInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})"/> call rather than
+            the time the object was created locally.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.SetProperty``1(``0,System.String)">
+            <summary>
+            Sets the value of a property based upon its associated BacktoryFieldName attribute.
+            </summary>
+            <param name="value">The new value.</param>
+            <param name="propertyName">The name of the property.</param>
+            <typeparam name="T">The type for the property.</typeparam>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.GetProperty``1(System.String)">
+            <summary>
+            Gets the value of a property based upon its associated BacktoryFieldName attribute.
+            </summary>
+            <returns>The value of the property.</returns>
+            <param name="propertyName">The name of the property.</param>
+            <typeparam name="T">The return type of the property.</typeparam>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.GetProperty``1(``0,System.String)">
+            <summary>
+            Gets the value of a property based upon its associated BacktoryFieldName attribute.
+            </summary>
+            <returns>The value of the property.</returns>
+            <param name="defaultValue">The value to return if the property is not present on the BacktoryObject.</param>
+            <param name="propertyName">The name of the property.</param>
+            <typeparam name="T">The return type of the property.</typeparam>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryObject.IsDirty">
+            <summary>
+            Indicates whether this BacktoryObject is not in sync with server. It could be either just created, 
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.HasChanges">
+            <summary>
+            Indicates whether this BacktoryObject has unsaved changes.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryObject.IsKeyDirty(System.String)">
+            <summary>
+            Indicates whether key is unsaved for this BacktoryObject.
+            </summary>
+            <param name="key">The key to check for.</param>
+            <returns><c>true</c> if the key has been altered and not saved yet, otherwise
+            <c>false</c>.</returns>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryObject.Keys">
+            <summary>
+            Gets a set view of the keys contained in this object. This does not include createdAt,
+            updatedAt, or objectId. It does include things like username and ACL.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryQuery">
+             <summary>
+             The BacktoryQuery class defines a query that is used to fetch BacktoryObjects. The
+             most common use case is finding all objects that match a query through the
+             <see cref="M:Backtory.Core.Public.BacktoryQuery.FindInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{System.Collections.Generic.IList{Backtory.Core.Public.BacktoryObject}}})"/> method.
+             </summary>
+             <example>
+             This sample code fetches all objects of
+             class <c>"MyClass"</c>:
+            
+             <code>
+             BacktoryQuery query = new BacktoryQuery("MyClass");
+             query.FindInBackground(response => 
+             { 
+            	if (response.Successful)
+            	  IList&lt;BacktoryObject&gt; results = response.Body; 
+             });
+             </code>
+            
+             A BacktoryQuery can also be used to retrieve a single object whose id is known,
+             through the <see cref="M:Backtory.Core.Public.BacktoryQuery.GetInBackground(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryObject}})"/> method. For example, this sample code
+             fetches an object of class <c>"MyClass"</c> and id <c>myId</c>.
+            
+             <code>
+             BacktoryQuery query = new BacktoryQuery("MyClass");
+             query.GetInBackground(objectId, response => 
+             { 
+            	if (response.Successful)
+            	  BacktoryObject result = response.Body; 
+             });
+             </code>
+            
+             A BacktoryQuery can also be used to count the number of objects that match the
+             query without retrieving all of those objects. For example, this sample code
+             counts the number of objects of the class <c>"MyClass"</c>.
+             
+             <code>
+             BacktoryQuery query = new BacktoryQuery("MyClass");
+             query.CountInBackground(response => 
+             { 
+            	if (response.Successful)
+            	  int result = response.Body; 
+             });
+             </code>
+             </example>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.#ctor(Backtory.Core.Public.BacktoryQuery,System.Collections.Generic.IDictionary{System.String,System.Object},System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String},System.String)">
+            <summary>
+            Private constructor for composition of queries. A source query is required,
+            but the remaining values can be null if they won't be changed in this
+            composition.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.#ctor(System.String)">
+            <summary>
+            Constructs a query. A default query with no further parameters will retrieve
+            all <see cref="T:Backtory.Core.Public.BacktoryObject"/>s of the provided class.
+            </summary>
+            <param name="className">The name of the class to retrieve BacktoryObjects for.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.Or(System.Collections.Generic.IEnumerable{Backtory.Core.Public.BacktoryQuery})">
+            <summary>
+            Constructs a query that is the or of the given queries.
+            </summary>
+            <param name="queries">The list of BacktoryQueries to 'or' together.</param>
+            <returns>A BacktoryQquery that is the 'or' of the passed in queries.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.OrderBy(System.String)">
+            <summary>
+            Sorts the results in ascending order by the given key.
+            This will override any existing ordering for the query.
+            </summary>
+            <param name="key">The key to order by.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.OrderByDescending(System.String)">
+            <summary>
+            Sorts the results in descending order by the given key.
+            This will override any existing ordering for the query.
+            </summary>
+            <param name="key">The key to order by.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.ThenBy(System.String)">
+             <summary>
+             Sorts the results in ascending order by the given key, after previous
+             ordering has been applied.
+            
+             This method can only be called if there is already an <see cref="M:Backtory.Core.Public.BacktoryQuery.OrderBy(System.String)"/>
+             or <see cref="M:Backtory.Core.Public.BacktoryQuery.OrderByDescending(System.String)"/>
+             on this query.
+             </summary>
+             <param name="key">The key to order by.</param>
+             <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.ThenByDescending(System.String)">
+             <summary>
+             Sorts the results in descending order by the given key, after previous
+             ordering has been applied.
+            
+             This method can only be called if there is already an <see cref="M:Backtory.Core.Public.BacktoryQuery.OrderBy(System.String)"/>
+             or <see cref="M:Backtory.Core.Public.BacktoryQuery.OrderByDescending(System.String)"/> on this query.
+             </summary>
+             <param name="key">The key to order by.</param>
+             <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.Select(System.String)">
+            <summary>
+            Restrict the fields of returned BacktoryObjects to only include the provided key.
+            If this is called multiple times, then all of the keys specified in each of
+            the calls will be included.
+            </summary>
+            <param name="key">The key that should be included.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.Skip(System.Int32)">
+            <summary>
+            Skips a number of results before returning. This is useful for pagination
+            of large queries. Chaining multiple skips together will cause more results
+            to be skipped.
+            </summary>
+            <param name="count">The number of results to skip.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.Limit(System.Int32)">
+            <summary>
+            Controls the maximum number of results that are returned. Setting a negative
+            limit denotes retrieval without a limit. Chaining multiple limits
+            results in the last limit specified being used. The default limit is
+            100, with a maximum of 1000 results being returned at a time.
+            </summary>
+            <param name="count">The maximum number of results to return.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.Sample(System.Int32)">
+            <summary>
+            Controls the number of random that are returned matching to this query constraints. Maximum value is 1000.
+            <para>Don't use sample alongside <see cref="M:Backtory.Core.Public.BacktoryQuery.Limit(System.Int32)"/> or <see cref="M:Backtory.Core.Public.BacktoryQuery.Skip(System.Int32)"/></para>
+            </summary>
+            <param name="count">The number of random records to return.</param>
+            <returns>A</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereContainedIn``1(System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Adds a constraint to the query that requires a particular key's value to be
+            contained in the provided list of values.
+            </summary>
+            <param name="key">The key to check.</param>
+            <param name="values">The values that will match.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereContainsAll``1(System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Add a constraint to the querey that requires a particular key's value to be
+            a list containing all of the elements in the provided list of values.
+            </summary>
+            <param name="key">The key to check.</param>
+            <param name="values">The values that will match.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereContains(System.String,System.String)">
+            <summary>
+            Adds a constraint for finding string values that contain a provided string.
+            This will be slow for large data sets.
+            </summary>
+            <param name="key">The key that the string to match is stored in.</param>
+            <param name="substring">The substring that the value must contain.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereDoesNotExist(System.String)">
+            <summary>
+            Adds a constraint for finding objects that do not contain a given key.
+            </summary>
+            <param name="key">The key that should not exist.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereEndsWith(System.String,System.String)">
+            <summary>
+            Adds a constraint for finding string values that end with a provided string.
+            This will be slow for large data sets.
+            </summary>
+            <param name="key">The key that the string to match is stored in.</param>
+            <param name="suffix">The substring that the value must end with.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereEqualTo(System.String,System.Object)">
+            <summary>
+            Adds a constraint to the query that requires a particular key's value to be
+            equal to the provided value.
+            </summary>
+            <param name="key">The key to check.</param>
+            <param name="value">The value that the BacktoryObject must contain.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereExists(System.String)">
+            <summary>
+            Adds a constraint for finding objects that contain a given key.
+            </summary>
+            <param name="key">The key that should exist.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereGreaterThan(System.String,System.Object)">
+            <summary>
+            Adds a constraint to the query that requires a particular key's value to be
+            greater than the provided value.
+            </summary>
+            <param name="key">The key to check.</param>
+            <param name="value">The value that provides a lower bound.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereGreaterThanOrEqualTo(System.String,System.Object)">
+            <summary>
+            Adds a constraint to the query that requires a particular key's value to be
+            greater or equal to than the provided value.
+            </summary>
+            <param name="key">The key to check.</param>
+            <param name="value">The value that provides a lower bound.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereLessThan(System.String,System.Object)">
+            <summary>
+            Adds a constraint to the query that requires a particular key's value to be
+            less than the provided value.
+            </summary>
+            <param name="key">The key to check.</param>
+            <param name="value">The value that provides an upper bound.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereLessThanOrEqualTo(System.String,System.Object)">
+            <summary>
+            Adds a constraint to the query that requires a particular key's value to be
+            less than or equal to the provided value.
+            </summary>
+            <param name="key">The key to check.</param>
+            <param name="value">The value that provides a lower bound.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereMatches(System.String,System.Text.RegularExpressions.Regex,System.String)">
+            <summary>
+            Adds a regular expression constraint for finding string values that match the provided
+            regular expression. This may be slow for large data sets.
+            </summary>
+            <param name="key">The key that the string to match is stored in.</param>
+            <param name="regex">The regular expression pattern to match. The Regex must
+            have the <see cref="F:System.Text.RegularExpressions.RegexOptions.ECMAScript"/> options flag set.</param>
+            <param name="modifiers">Any of the following supported PCRE modifiers:
+            <code>i</code> - Case insensitive search
+            <code>m</code> Search across multiple lines of input</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereMatches(System.String,System.Text.RegularExpressions.Regex)">
+            <summary>
+            Adds a regular expression constraint for finding string values that match the provided
+            regular expression. This may be slow for large data sets.
+            </summary>
+            <param name="key">The key that the string to match is stored in.</param>
+            <param name="regex">The regular expression pattern to match. The Regex must
+            have the <see cref="F:System.Text.RegularExpressions.RegexOptions.ECMAScript"/> options flag set.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereMatches(System.String,System.String,System.String)">
+            <summary>
+            Adds a regular expression constraint for finding string values that match the provided
+            regular expression. This may be slow for large data sets.
+            </summary>
+            <param name="key">The key that the string to match is stored in.</param>
+            <param name="pattern">The PCRE regular expression pattern to match.</param>
+            <param name="modifiers">Any of the following supported PCRE modifiers:
+            <code>i</code> - Case insensitive search
+            <code>m</code> Search across multiple lines of input</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereNotContainedIn``1(System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Adds a constraint to the query that requires a particular key's value to be
+            contained in the provided list of values.
+            </summary>
+            <param name="key">The key to check.</param>
+            <param name="values">The values that will match.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereNotEqualTo(System.String,System.Object)">
+            <summary>
+            Adds a constraint to the query that requires a particular key's value not
+            to be equal to the provided value.
+            </summary>
+            <param name="key">The key to check.</param>
+            <param name="value">The value that that must not be equalled.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.WhereStartsWith(System.String,System.String)">
+            <summary>
+            Adds a constraint for finding string values that start with the provided string.
+            This query will use the backend index, so it will be fast even with large data sets.
+            </summary>
+            <param name="key">The key that the string to match is stored in.</param>
+            <param name="suffix">The substring that the value must start with.</param>
+            <returns>A new query with the additional constraint.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.FindInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{System.Collections.Generic.IList{Backtory.Core.Public.BacktoryObject}}})">
+            <summary>
+            Retrieves a list of BacktoryObjects that satisfy this query from Backtory.
+            </summary>
+            <returns>The list of BacktoryObjects that match this query.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.GetInBackground(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryObject}})">
+            <summary>
+            Retrieve the row with passed id. returns error if row with this id doesn't exists in database.
+            </summary>
+            <param name="objectId">Primary key of the row you want to retrieve</param>
+            <param name="callback">An action to be executed upon receiving the server response.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.CountInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{System.Int32}})">
+            <summary>
+            Counts the number of objects that match this query.
+            </summary>
+            <param name="callback">An action to be executed upon receiving the server response.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryQuery.Equals(System.Object)">
+            <summary>
+            Determines whether the specified object is equal to the current object.
+            </summary>
+            <param name="obj">The object to compare with the current object.</param>
+            <returns><c>true</c> if the specified object is equal to the current object; otherwise, <c>false</c></returns>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryRole">
+             <summary>
+             Represents a Role on the Parse server. ParseRoles represent groupings
+             of <see cref="!:ParseUser"/>s for the purposes of granting permissions (e.g.
+             specifying a <see cref="!:ParseACL"/> for a <see cref="!:ParseObject"/>. Roles
+             are specified by their sets of child users and child roles, all of which are granted
+             any permissions that the parent role has.
+            
+             Roles must have a name (that cannot be changed after creation of the role),
+             and must specify an ACL.
+             </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryRole.#ctor">
+            <summary>
+            Constructs a new ParseRole. You must assign a name and ACL to the role.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryRole.#ctor(System.String,Backtory.Core.Public.BacktoryACL)">
+            <summary>
+            Constructs a new ParseRole with the given name.
+            </summary>
+            <param name="name">The name of the role to create.</param>
+            <param name="acl">The ACL for this role. Roles must have an ACL.</param>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryRole.Name">
+            <summary>
+            Gets the name of the role.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryWebsocketMonitor">
+            <summary>
+            This class has some utility method for measuring 'Backtory Realtime service' state and delay profiling.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryWebsocketMonitor.RTT(System.Action{System.Int64},System.String)">
+            <summary>
+            RTD stands for 'round-trip delay time' and is the length of time it takes for a request to be sent 
+            plus the length of time it takes for an acknowledgment of that request to be received.
+            <para>
+            You can pass payload as body parameter to see the effect of request size in delay.
+            </para>
+            </summary>
+            <param name="callbcak">An action to be called with Backtory delay as its parameter. int.MaxValue indicates failure.</param>
+            <param name="body">An arbitrary string to send as request body which server returns it intact.</param>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryMatchFoundMessage.Address">
+            <summary>
+            Address of websocket player must connect in order to play the realtime match
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.BacktoryChallengeFailureCause.Expired">
+            <summary>
+            Duration set in <see cref="M:Backtory.Core.Internal.ChallengeRequest.#ctor(System.Collections.Generic.IList{System.String},System.Int32,System.Int32,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryChallengeResponse}},System.String,System.String,System.String)"/>
+            throu 'WaitTime' parameter has passed
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.BacktoryChallengeFailureCause.FormedWithouYou">
+            <summary>
+            Minimum number of players needed for forming the challenge are gathered and you cannot be a part of challenge any more.
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.BacktoryChallengeFailureCause.Impossible">
+            <summary>
+            Even if you accept the challenge, number of players for forming the challenge won't be enough and thus challenge is impossible to form.
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.BacktoryChallengeFailureCause.Canceled">
+            <summary>
+            Creator of challenge canceled it.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.EventNameAttribute">
+            <summary>
+            Denotes the name for <see cref="T:Backtory.Core.Public.BacktoryGameEvent"/> object.
+            can be set on <i>static</i> fields and properties.
+            <para>See the example part in XML doc for sample usage</para>
+            </summary>
+            <example><code>
+            public class GameOverEvent : BacktoryEvent
+            {
+                [EventNameAttribute]
+                public const string eventName = "GameOver";
+            }
+            </code>
+            </example>
+            <seealso cref="T:Backtory.Core.Public.FieldNameAttribute"/>
+        </member>
+        <member name="T:Backtory.Core.Public.FieldNameAttribute">
+             <summary>
+             Denotes the <i>fieldName</i> of a <see cref="T:Backtory.Core.Public.BacktoryGameEvent.FieldValue"/>
+             which this value must assigned to. Must be used for fields of an <c>BacktoryEvent</c>
+             object. 
+             <para>See example part in XML doc for sample usage</para>
+             </summary>
+             <code>
+             public class GameOverEvent : BacktoryEvent
+             {
+                 [EventName]
+                 public const string eventName = "GameOver";
+                 
+                 [FieldNameAttribute("Coin")]
+                 int coinValue;
+            
+                 [FieldNameAttribute("Time")]
+                 int timeValue;
+                 .
+                 .
+                 .
+                 public GameOverEvent(int coinValue, int timeValue)
+                 {
+                     CoinValue = coinValue;
+                     TimeValue = timeValue;
+                 }
+             </code>
+             <seealso cref="T:Backtory.Core.Public.EventNameAttribute"/>
+        </member>
+        <member name="F:Backtory.Core.Public.FieldNameAttribute.Name">
+            <summary>
+            An event with this attributed property or field, will take this as its <see cref="P:Backtory.Core.Public.BacktoryGameEvent.Name"/>
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.FieldNameAttribute.#ctor(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="fieldName"><see cref="F:Backtory.Core.Public.FieldNameAttribute.Name"/></param>
+        </member>
+        <member name="T:Backtory.Core.Public.LeaderboardIdAttribute">
+            <summary>
+            Use this annotation to denote the its target for using as <see cref="T:Backtory.Core.Public.BacktoryLeaderBoard"/> id attribute.
+            Can be used on <i>static</i> fields and properties.
+            <para>see example part in XML doc for sample usage</para>
+            </summary>
+            <example><code>
+            public class BestRecordsLeaderboard : BacktoryLeaderboard
+            {
+                [LeaderboardIdAttribute]
+                public const string id = "576d4a33e4b050913524162c";
+            }
+            </code></example>
+            <seealso cref="T:Backtory.Core.Public.BacktoryLeaderBoard"/>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryUser">
+            <summary>
+            Represents a user in the context of Backtory 'users service'. 
+            Can be used to register a new user, login, change password and other features.
+            See <see href="http://backtory.com/documents/auth/intro.html">users service documents</see> for more info.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUser.CurrentUser">
+            <summary>
+            After a login request Backtory SDK holds the information of logged-in user in RAM and Disk
+            to prevent the network request every time user info is needed.
+            This returns currently logged-in user from memory or disk or null if a user has not logged-in;
+            </summary>
+            <returns>currently logged-in user synchronously from memory if data exist on RAM and from DISK if not present
+            in RAM.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.RegisterInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryUser}})">
+            <summary>
+            Registers this user on Backtory server in background. This is separate from activation process
+            but if activation not set in Backtory panel, user will be active after this method execution.
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.Register"/>, unless your code is already running from a
+            background thread.</para>
+            </summary>
+            <param name="callback"></param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.Register">
+            <summary>
+            Synchronously registers this user on backtory servers and returns its response.
+            This is separate from activation process
+            but if activation not set in Backtory panel, user will be active after this method execution.
+            <para>Typically, you should <see cref="M:Backtory.Core.Public.BacktoryUser.RegisterInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryUser}})"/>use instead of this,
+            unless you are managing your own threading.</para>
+            </summary>
+            <returns>Backtory user registered on server wrapped in a <c>BacktoryResponse</c></returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.Login(System.String,System.String)">
+            <summary>
+            Synchronously logins the specified user by username and password and returns its response.
+            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryUser.LoginInBackground(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})"/>
+            instead of this, unless you are managing your own threading.</para>
+            </summary>
+            <param name="username">username of application user who wants to login into the app.</param>
+            <param name="password">password of application user who wants to login into the app.</param>
+            <returns>Server response showing request was successful or not. Body is empty.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.LoginInBackground(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Logins the specified user by username and password in background.
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.Login(System.String,System.String)"/>, unless your code is already
+            running from a background thread.</para>
+            </summary>
+            <param name="username">username of application user who wants to login into the app.</param>
+            <param name="password">password of application user who wants to login into the app.</param>
+            <param name="callback">callback notified upon receiving server response or any error in the
+            process.Server response is login session details wrapped in a <c>BacktoryResponse</c>.</param>
+            <seealso cref="T:Backtory.Core.Public.BacktoryUser.LoginResponse"/>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.LoginAsGuestInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Registers a guest account on server and logins with that in background.
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.LoginAsGuest"/>, unless your code is already
+            running from a background thread.</para>
+            </summary>
+            <param name="callback">callback notified upon receiving server response or any error in the
+            process. Server response is login session details wrapped in a <c>BacktoryResponse</c>.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.LoginAsGuest">
+            <summary>
+            Synchronously registers a guest account on server and logins with that.
+            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryUser.LoginAsGuestInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})"></see>
+            instead of this, unless you are managing your own threading.</para>
+            <para>Data of guest user automatically stored on this request succession and you can access that with
+            <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser"></see></para>
+            </summary>
+            <returns>Login session details wrapped in a <c>BacktoryResponse</c>.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.NewAccessTokenInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryUser.LoginResponse}})">
+            <summary>
+            This is for test. Not used in main code anywhere.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.CompleteRegistrationInBackgrond(Backtory.Core.Public.BacktoryUser.GuestCompletionParam,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryUser}})">
+            <summary>
+            Converts a guest user to a normal one with passed information in background.
+            <para>You should get the user object by <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser"/> because it contains the
+            information which backtory server needs to distinct the guest user from others.</para>
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.CompleteRegistration(Backtory.Core.Public.BacktoryUser.GuestCompletionParam)"/>,
+            unless your code is already running from a background thread</para>
+            </summary>
+            <param name="guestRegistrationParam">information required for converting guest user to normal user</param>
+            <param name="callback">callback notified upon receiving server response or any error in the
+            process. Server response is newly converted user wrapped in a <c>BacktoryResponse</c></param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.CompleteRegistration(Backtory.Core.Public.BacktoryUser.GuestCompletionParam)">
+            <summary>
+            Synchronously converts a guest user to a normal one with passed information
+            in backtory server and returns its response.
+            <para>You should get the user object by <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser"/> because it encloses the
+            information which backtory server needs to distinct the guest user from others.</para>
+            </summary>
+            <param name="guestRegistrationParam">information required for converting guest user to normal user</param>
+            <returns>newly converted user wrapped in a <c>BacktoryResponse</c></returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.ChangePasswordInBackground(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Converts a guest user to a normal one with passed information in background.
+            <para>You should get the user object by <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser"/> because it contains the
+            information which backtory server needs to distinct the guest user from others.</para>
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.CompleteRegistration(Backtory.Core.Public.BacktoryUser.GuestCompletionParam)"/>,
+            unless your code is already running from a background thread.</para>
+            </summary>
+            <param name="oldPassword">old password user wants to change</param>
+            <param name="newPassword">newPassword new password user wants to change old one into it.</param>
+            <exception cref="T:System.InvalidOperationException">If you call this on a guest user</exception>
+            <param name="callback"></param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.ChangePassword(System.String,System.String)">
+            <summary>
+            Synchronously changes the user password in backtory server and returns its response.
+            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryUser.ChangePasswordInBackground(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})"/>
+            instead of this, unless you are managing your own threading.</para>
+            <para><b>You can't change a guest users's password.</b></para>
+            </summary>
+            <param name="oldPassword">old password user wants to change</param>
+            <param name="newPassword">newPassword new password user wants to change old one into it.</param>
+            <exception cref="T:System.InvalidOperationException">If you call this on a guest user</exception>
+            <returns>Server response containing no body</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.ForgotPassword(System.String)">
+            <summary>
+            Synchronously request for password recovery email. Request success has no relation with
+            sending email from backtory or user delivering it.
+            <para> Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryUser.ForgotPasswordInBackground(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})"/>
+            instead of this, unless you are managing your own threading.
+            </para>
+            </summary>
+            <param name="username">username determining which user backtory must send the recovery email into
+            </param>
+            <returns>Server response containing no body</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.ForgotPasswordInBackground(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Requests for password recovery email in background. Request success has no relation with
+            sending email from backtory or user delivering it.
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.ForgotPasswordRequest(System.String)"/>,
+            unless your code is already running from a background thread.
+            </para>
+            </summary>
+            <param name="username">sername username determining which user backtory must send the recovery email into</param>
+            <param name="callback">backtoryCallBack callback notified upon receiving server response or any error in the
+            process. Server response contains no body.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.UpdateUserInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryUser}})">
+            <summary>
+            Updates this user changes in backtory server in background.
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.UpdateUser"/>
+            unless your code is already running from a background thread.</para>
+            </summary>
+            <param name="callback">backtoryCallBack callback notified upon receiving server response or any error in the
+            process. Server response is updated user wrapped in a <c>BacktoryRespone</c></param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.UpdateUser">
+            <summary>
+            Synchronously updates this user changes in backtory server.
+            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryUser.UpdateUserInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryUser}})"/>
+            instead of this, unless you are managing your own threading.</para>
+            </summary>
+            <returns>updated user wrapped in a <c>BacktoryResponse</c></returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.LogoutInBackground">
+            <summary>
+            Logouts the current user from backtory server and clears every data related to current
+            user. After this method <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser"/> will return <c>null</c>.
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryUser.Logout"/>, unless your code is already running from a
+            background thread.</para>
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.Logout">
+            <summary>
+            Synchronously logouts the current user from backtory server and clears every data related to
+            user. After this method <see cref="P:Backtory.Core.Public.BacktoryUser.CurrentUser"/> will return <c>null.</c>
+            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryUser.LogoutInBackground"/> 
+            instead of this, unless you are managing your own threading</para>
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.ClearStorageAndReturnRefreshToken">
+            <summary>
+            We must clear everything first, because logout is independent from server and expiration of refresh-token
+            but if doing that, we can't get refresh token from storage because it's already cleared.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.Get(System.String)">
+            <summary>
+            Gets a field from this user other than user default parameters.
+            </summary>
+            <param name="key">The key to access the value for.</param>
+            <returns><c>null</c> if there is no such key.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryUser.Put(System.String,System.String)">
+            <summary>
+            Adds a new field to this user. After registering or updating, it can be seen in Users table
+            under the 'additionalFields' column.
+            </summary>
+            <param name="key">key for associating this value to.</param>
+            <param name="value">an arbitrary data in String format.</param>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUser.Username">
+            <summary>
+            User's username which is unique between all of the application users though 
+            could be change by <see cref="M:Backtory.Core.Public.BacktoryUser.UpdateUserInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryUser}})"/>
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUser.Password">
+            <summary>
+            User's password. Note that it will be present <b>only if this user is guest.</b> For normal users this will always be null 
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUser.Email">
+            <summary>
+            User's email. If verification by email is enabled for project (contact us for that!)
+            this will be mandatory for registering.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUser.Guest">
+            <summary>
+            Determines the type of this user. True if it's guest, false if not.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUser.Active">
+            <summary>
+            If verification process is enabled for project (contact us for that!), 
+            user can be in inactive state which means it hasn't done the verification phase
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUser.Avatar">
+            <summary>
+            User avatar picture address.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryUser.GuestCompletionParam">
+            <summary>
+            Encapsulates data needed for completing a guest user registration and converting him/her to a normal user.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUser.GuestCompletionParam.LastPassword">
+            <summary>
+            Guest user backtory-auto generated password. If you are calling this on result
+            <para>Note: this field is mandatory</para>
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUser.GuestCompletionParam.NewUsername">
+            <summary>
+            Normal user created from the guest would have this as username
+            <para>Note: this field is mandatory</para>
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUser.GuestCompletionParam.NewPassword">
+            <summary>
+            Normal user created from the guest would have this as password
+            <para>Note: this field is mandatory</para>
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryClient">
+            <summary>
+            Entry point for using Backtory SDK. Before starting to use SDK features, first call <see cref="M:Backtory.Core.Public.BacktoryClient.Init(Backtory.Core.Public.KeysConfiguration,System.String,System.String,System.String)"/>
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryClient.Conf">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryClient.Init(Backtory.Core.Public.KeysConfiguration,System.String,System.String,System.String)">
+            <summary>
+            Initializes the SDK; After this, you can use SDK for connecting to backtory server and calling its services.
+            </summary>
+            <param name="keysConf">Includes the Backtory API key for parts of backtory you want to use. For example if you want to use 
+            game and leaderboard services, you must set your game ID in this object.</param>
+            <param name="storageAddress">You could supply custom path for </param>
+            <param name="restAddress">Base address for all HTTP or HTTPS requests.</param>
+            <param name="connectivityAddress">Base address for websocket requests.</param>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryClient.DebugMode">
+            <summary>
+            If true, SDK prints verbose messages which shows detailed 
+            info about what is happening in SDK but affects the performance. Don't set it to true for production release.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryClient.LogLevel">
+            <summary>
+            Indicates severity of logs to be printed. LogLevel.Verbose tells SDK to print any log but in other hand LogLevel.Error just prints errors and exception logs
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryClient.StartRealtimeService(Backtory.Core.Public.BacktoryConnectionStatusListener)">
+            <summary>
+            Establish a websocket connection to backtory realtime service. A logged-in user is necessary.
+            </summary>
+            <param name="connectionListener">A listener for events occurred during the websocket's life</param>
+            <exception cref="T:System.InvalidOperationException">Throws if SDK doesn't have a logged-in user.</exception>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryClient.IsRealtimeServiceConnected">
+            <summary>
+            Shows if connection to Backtory realtime service is active and healthy.
+            </summary>
+            <returns>True if a connection exists.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryClient.StopRealtimeService">
+            <summary>
+            Terminates the connection to Backtory realtime. 
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryClient.SetOnErrorListener(System.Action{Backtory.Core.Public.BacktoryErrorMessage})">
+            <summary>
+            This is temporary and is highly to be replaced later.
+            </summary>
+            <remarks>This listens to errors originated from Chat, Matchmaking and Challenge. For listening to
+            realtime game errors, pass listener to <see cref="P:Backtory.Core.Public.BacktoryRealtimeGame.OnError"/></remarks>
+        </member>
+        <member name="F:Backtory.Core.Public.BacktoryClient.SdkVersion">
+            <summary>
+            SDK version
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.KeysConfiguration">
+            <summary>
+            Encapsulates Backtory API keys. Found yours in Backtory panel. Use <see cref="T:Backtory.Core.Public.KeysConfiguration.Builder"/>
+            for creating an instance and pass it to<see cref="M:Backtory.Core.Public.BacktoryClient.Init(Backtory.Core.Public.KeysConfiguration,System.String,System.String,System.String)"/>
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.Configuration">
+            <summary>
+            Encapsulating SDK data. Version, Keys, etc.
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.Configuration.KeysConf">
+            <summary>
+            Credential keys. Found yours in Backtory panel.
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.Configuration.StorageAddress">
+            
+        </member>
+        <member name="P:Backtory.Core.Public.IBacktoryResponse.Code">
+            <summary>
+            Response status code received from backtory server which generally show what has happened in
+            processing request.
+            <para>Cast this to <see cref="T:Backtory.Core.Public.BacktoryHttpStatusCode"/> to get the corresponding enum.</para>
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.IBacktoryResponse.Message">
+            <summary>
+            If an unsuccessful request, this shows the cause of error happened in the process.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.IBacktoryResponse.Successful">
+            <summary>
+            If true, shows that request has been successful. If false, there's been a problem either in 
+            client or server side. Use <see cref="P:Backtory.Core.Public.IBacktoryResponse.Code"/> and <see cref="P:Backtory.Core.Public.IBacktoryResponse.Message"/> for getting more info.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.IBacktoryResponse`1">
+            <summary>
+            Holds the data came from a network request.
+            </summary>
+            <typeparam name="T">Type of response body. e.g. if registering a user, this would be <c>BacktoryUser</c>, </typeparam>
+        </member>
+        <member name="P:Backtory.Core.Public.IBacktoryResponse`1.Body">
+            <summary>
+            Content of the response, converted to type specified by <c>T</c>
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryResponse.Message">
+            <summary>
+            In case of a unsuccessful response this message shows the error cause.
+            If server provides error description takes that value, 
+            if not the above and If a network error occurs (e.g. time out) takes the exception message as value
+            if not the above just takes the corresponding HTTP status representation.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryCloudcode">
+            <summary>
+            A helper class for starting a cloud-code function in backtory server and getting the result back.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryCloudcode.Run``1(System.String,System.Object)">
+            <summary>
+            Synchronously sends the argument for backtory cloud function specified with <c>functionName</c>
+            waits for execution and returns its response.
+            </summary>
+            <typeparam name="T"> Type of expected response.</typeparam>
+            <param name="functionName">name of cloud function you've set in backtory panel.</param>
+            <param name="requestBody">input argument for cloud function.If a String object, will be send intact if anything else will be serialized to json.</param>
+            <returns>result of cloud function execution wrapped in a <see cref="T:Backtory.Core.Public.BacktoryResponse`1"/></returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryCloudcode.RunInBackground``1(System.String,System.Object,System.Action{Backtory.Core.Public.IBacktoryResponse{``0}})">
+            <summary>
+            Sends the argument for backtory cloud function specified with <c>functionName</c> in
+            background and returns its execution response.
+            </summary>
+            <typeparam name="T"> Type of expected response.</typeparam>
+            <param name="functionName">name of cloud function you've set in backtory panel.</param>
+            <param name="requestBody">input argument for cloud function.If a String object, will be send intact if anything else will be serialized to json.</param>
+            <param name="callback">callback notified upon receiving server response or any error in the
+            process. Server response is the result of cloud function execution wrapped in a <see cref="T:Backtory.Core.Public.BacktoryResponse`1"/></param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:Backtory.Core.Public.BacktoryFile" -->
+        <member name="M:Backtory.Core.Public.BacktoryFile.Upload(System.String,System.Boolean)">
+            <summary>
+            Uploads the file specified by <paramref name="fileAddress"/> to backtory server synchronously. 
+            <para>Typically, you should use <see cref="!:UploadInBackground(string, string, bool, Action&lt;IBacktoryResponse&lt;string&gt;&gt;)"/>
+            instead of this, unless you are managing your own threading.</para>
+            <para>Beware that <u>Separator</u> character may vary in the running context with Backtory, 
+            For example in windows it's '\' but and in backtory its '/'. 
+            Also note that if the file name contains certain characters, it will be changed on server witch can be found in <see cref="!:SavedUrl"/></para>
+            </summary>
+            <param name="fileAddress">Absolute Address of local file to upload. For example @"D:\Pictures\user45.png"</param>
+            <param name="uploadPath">Relative address of directory the file should be uploaded there. If not provided, file will be uploaded
+            on root of your storage. This cannot contain certain characters.</param>
+            <param name="replace">Indicates that if another file with same name exist on the <paramref name="uploadPath"/>, 
+            this file should replace that or not</param>
+            <returns>Result of this operation as a <c>IBacktoryResponse</c>. If successful, the response contains
+            the address of file on server.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryFile.UploadInBackground(System.String,System.Boolean,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})">
+            <summary>
+            Uploads the file specified by <paramref name="fileAddress"/> to backtory server in background.
+            <para>This is preferable to using <see cref="!:Upload(string, string, bool)"/>, unless your code is already
+            running from a background thread.</para>
+            <para>Beware that <i>Separator</i> character may vary in the running context with Backtory, 
+            For example in windows it's '\' but and in backtory its '/'. 
+            Also note that if the file name contains certain characters, it will be changed on server witch can be found in <see cref="!:SavedUrl"/></para>
+            </summary>
+            <param name="fileAddress">Absolute Address of local file to upload. For example @"D:\Pictures\user45.png"</param>
+            <param name="uploadPath">Relative address the place the file should be uploaded there. If not provided, file will be uploaded
+            on root of your storage. This cannot contain certain characters.</param>
+            <param name="replace">Indicates that if another file with same name exist on the <paramref name="uploadPath"/>, 
+            this file should replace that or not</param>
+            <param name="callback">A method to execute with the result of this operation as a <c>IBacktoryResponse</c>.
+            If upload is successful, response contains the address of file on server. </param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryFile.Rename(System.String,System.String)">
+            <summary>
+            Renames a file on backtory server synchronously. You <b>cannot</b> rename a folder!
+            <para>Typically, you should use <see cref="M:Backtory.Core.Public.BacktoryFile.RenameInBackground(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})"/>
+            instead of this, unless you are managing your own threading.</para>
+            </summary>
+            <param name="newName">New name for this file. Cannot contain certain characters like ' '.</param>
+            <returns>Result of this operation as a <c>IBacktoryResponse</c>. If successful, the response contains
+            the new address of file on server. <b>Warning: </b>Sadly the returned address has your bucket name as a prefix. For example if you've set
+            your bucket name in panel as "backtory", and newName is "/avatars/user45 edited.png", response body would be "backtory/avatars/user45+edited.png"</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryFile.RenameInBackground(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse{System.String}})">
+            <summary>
+            Renames a file on Backtory server in background. You <b>cannot</b> rename a folder!
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryFile.Rename(System.String,System.String)"/>, unless your code is already
+            running from a background thread.</para>
+            </summary>
+            <param name="newName">New name for this file. Cannot contain certain characters like ' '.</param>
+            <param name="callback">A method to execute with the result of this operation as a <c>IBacktoryResponse</c>.
+            If successful, the response contains the new address of file on server. 
+            <b>Warning: </b>Sadly the returned address has your bucket name as a prefix. For example if you've set
+            your bucket name in panel as "backtory", and newName is "/avatars/user45 edited.png", response body would be "backtory/avatars/user45+edited.png"
+            </param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryFile.Delete(System.String,System.Boolean)">
+            <summary>
+            Deletes this resource (file or folder) from server synchronously. 
+            <para>Typically, you should use <see cref="!:DeleteInBackground(bool, Action&lt;IBacktoryResponse&gt;)"/>
+            instead of this, unless you are managing your own threading.</para>
+            </summary>
+            <param name="deleteFolderIfNotEmpty">If true and this is a folder, will delete the folder along the all subfile/sub-folders</param>
+            <returns>Result of this operation as a <c>IBacktoryResponse</c>.</returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryFile.DeleteInBackground(System.String,System.Boolean,System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Deletes this resource (file or folder) from server in background.
+            <para>Typically, you should use <see cref="!:RenameInBackground(string, Action&lt;IBacktoryResponse&lt;string&gt;&gt;)"/>
+            instead of this, unless you are managing your own threading.</para>
+            </summary>
+            <param name="deleteFolderIfNotEmpty">If true and this is a folder, will delete the folder along the all subfile/sub-folders</param>
+            <param name="callback">A method to execute with the result of this operation as a <c>IBacktoryResponse</c>.</param>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryFile.Bulk">
+            <summary>
+            Helping work with multiple files.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Backtory.Core.Public.BacktoryFile.Bulk.Upload(System.Collections.Generic.IList{System.String},System.Collections.Generic.IList{System.String},System.Collections.Generic.IList{System.Boolean})" -->
+        <!-- Badly formed XML comment ignored for member "M:Backtory.Core.Public.BacktoryFile.Bulk.UploadInBackground(System.Collections.Generic.IList{System.String},System.Collections.Generic.IList{System.String},System.Collections.Generic.IList{System.Boolean},System.Action{Backtory.Core.Public.IBacktoryResponse{System.Collections.Generic.IList{System.String}}})" -->
+        <!-- Badly formed XML comment ignored for member "M:Backtory.Core.Public.BacktoryFile.Bulk.Rename(System.Collections.Generic.IList{System.String},System.Collections.Generic.IList{System.String})" -->
+        <!-- Badly formed XML comment ignored for member "M:Backtory.Core.Public.BacktoryFile.Bulk.RenameInBackground(System.Collections.Generic.IList{System.String},System.Collections.Generic.IList{System.String},System.Action{Backtory.Core.Public.IBacktoryResponse{System.Collections.Generic.IList{System.String}}})" -->
+        <!-- Badly formed XML comment ignored for member "M:Backtory.Core.Public.BacktoryFile.Bulk.Delete(System.Collections.Generic.IList{System.String},System.Collections.Generic.IList{System.Boolean})" -->
+        <!-- Badly formed XML comment ignored for member "M:Backtory.Core.Public.BacktoryFile.Bulk.DeleteInBackground(System.Collections.Generic.IList{System.String},System.Collections.Generic.IList{System.Boolean},System.Action{Backtory.Core.Public.IBacktoryResponse})" -->
+        <member name="T:Backtory.Core.Public.BacktoryGameEvent">
+            <summary>
+            Represents event entity in Backtory game and leaderboard services.
+            It is encouraged developer extends this class and use <see cref="T:Backtory.Core.Public.FieldNameAttribute"/> and <see cref="T:Backtory.Core.Public.EventNameAttribute"/> for easier usage.
+            </summary>
+            <seealso href="http://backtory.com/documents/game-center/unity/leaderboard.html#2.-%D8%A7%D8%B3%D8%AA%D9%81%D8%A7%D8%AF%D9%87-%D8%A7%D8%B2-%DB%8C%DA%A9-%D8%B4%DB%8C%D8%A6-%D8%AC%D8%AF%DB%8C%D8%AF">
+            Documentation
+            </seealso> for a detailed example.
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryGameEvent.Name">
+            <summary>
+            Show which event defined in backtory panel it represent.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryGameEvent.FieldsAndValues">
+            <summary>
+            Data associated with this event in form of field and value"/>
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryGameEvent.#ctor">
+            <summary>
+            Child classes must user empty constructor.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryGameEvent.#ctor(System.String,System.Collections.Generic.IList{Backtory.Core.Public.BacktoryGameEvent.FieldValue})">
+            <summary>
+            Don't use this constructor if you are inheriting from <see cref="T:Backtory.Core.Public.BacktoryGameEvent"/> 
+            </summary>
+            <param name="eventName"><see cref="P:Backtory.Core.Public.BacktoryGameEvent.Name"/></param>
+            <param name="fieldValues"><see cref="P:Backtory.Core.Public.BacktoryGameEvent.FieldsAndValues"/></param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryGameEvent.Send">
+            <summary>
+            Synchronously sends this event to update its corresponding leaderboard and returns its response.
+            <para>Typically, you should use {@link #sendAsync(BacktoryCallBack)} instead of this, unless
+            you are managing your own threading.</para>
+            </summary>
+            <returns>Empty body wrapped in a <see cref="T:Backtory.Core.Public.BacktoryResponse"/>.</returns>
+            <seealso cref="T:Backtory.Core.Public.BacktoryLeaderBoard"/>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryGameEvent.SendInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Sends this event to update its corresponding leaderboard in background.
+            <para>This is preferable to using <see cref="M:Backtory.Core.Public.BacktoryGameEvent.Send"/>, unless your code is already running from a
+            background thread.</para>
+            </summary>
+            <param name="callBack">callback notified upon receiving server response or any error in the
+            process. Server response is a Backtory user registered on server wrapped in a <see cref="T:Backtory.Core.Public.BacktoryResponse"/>.
+            Server response contains nothing.</param>
+            <seealso cref="T:Backtory.Core.Public.BacktoryLeaderBoard"/>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryGameEvent.InitFieldsUsingAnnotations(Backtory.Core.Public.BacktoryGameEvent)">
+            <summary>
+            Reads annotation fields for event name and field-values and set them to
+            proper event fields. After this method, json serialization of event will meet server expectation
+            </summary>
+            <param name="gameEvent">always is caller event. Just for test purposes</param>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryGameEvent.FieldValue">
+            <summary>
+            A key value entity, used for adding data to an event.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryGameEvent.FieldValue.FieldName">
+            <summary>
+            Shows which field of event this is
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryGameEvent.FieldValue.Value">
+            <summary>
+            Value of this field. e.g. seconds lasted in a game
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryGameEvent.FieldValue.#ctor(System.String,System.Int32)">
+            
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryGameEvent.FieldValue.Equals(System.Object)">
+            <see cref="M:System.Object.Equals(System.Object)"/>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryLeaderBoard">
+            <summary>
+            Class representation of Backtory leaderboard entity. Each leaderboard is distinguished from others
+            by an Id accessible from backtory panel.
+            <para>A leaderboard can be used to get info about leaderboard players and position of user in leaderboard</para>
+            <para>All methods of leaderboard class which perform network call needs that 
+            <see cref="P:Backtory.Core.Public.BacktoryLeaderBoard.LeaderboardId"/> to has been set. See examples in class documentation to see usage methods.</para>
+            </summary>
+            <example> setting <see cref="P:Backtory.Core.Public.BacktoryLeaderBoard.LeaderboardId"/> not using attribute
+            <code>
+             LeaderBoard topPlayers = new LeaderBoard();
+             topPlayers.setLeaderBoardId("leaderboard id from panel");
+             topPlayers.getTopPlayersInBackground(5, callback)
+            </code>
+            <example>Extending leaderBoard class and annotating a static field as leaderBoardId for all instances of this
+            extended leaderboard</example>
+            <code>
+             public class TopPlayersLeaderBoard extends BacktoryLeaderBoard {
+            
+               LeaderBoardId
+               public static final string id = "leaderboard id";
+             }
+             ...
+             new TopPlayersLeaderBoard().getTopPlayersInBackground(5, callback);
+            </code>
+            </example>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryLeaderBoard.LeaderboardId">
+            <summary>
+            Id of this leaderboard defined in Backtory panel
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryLeaderBoard.#ctor">
+            <summary>
+            Creates a new instance and searches for a property/field attributed with <see cref="T:Backtory.Core.Public.LeaderboardIdAttribute"/>.
+            If found exactly one, set that as <see cref="P:Backtory.Core.Public.BacktoryLeaderBoard.LeaderboardId"/>
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryLeaderBoard.#ctor(System.String)">
+            <summary>
+            Child classes must user empty constructor.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryLeaderBoard.GetPlayerRank">
+            <summary>
+            Synchronously gets the current user position in this leaderboard and returns its response.
+            </summary>
+            <returns>a LeaderBoardRank object which presents current user rank in this leaderboard wrapped
+            in a <see cref="T:Backtory.Core.Public.BacktoryResponse`1"/></returns>
+            <seealso cref="T:Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardRank"/>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryLeaderBoard.GetPlayerRankInBackground(System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardRank}})">
+            <summary>
+            Gets the current user position in this leaderboard in background.
+            </summary>
+            <param name="callback">backtoryCallBack callback notified upon receiving server response or any error in the
+            process. Server response is a LeaderBoardRank object which presents current user position in
+            leaderboard wrapped in a <see cref="T:Backtory.Core.Public.BacktoryResponse`1"/></param> 
+            <seealso cref="T:Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardRank"/> 
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryLeaderBoard.GetTopPlayers(System.Int32)">
+            <summary>
+            Synchronously gets top players of this leaderboard.
+            </summary>
+            <param name="count">count number of players in top of leaderboard you want to receive. Limited to 100.</param> 
+            <returns>a LeaderBoardResponse object presenting players info wrapped in a <see cref="T:Backtory.Core.Public.BacktoryResponse`1"/></returns> 
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryLeaderBoard.GetTopPlayersInBackground(System.Int32,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardResponse}})">
+            <summary>
+            Gets top players of this leaderboard in background.
+            </summary>
+            <param name="count"></param> number of players in top of leaderboard you want to receive. Limited to 100.
+            <param name="backtoryCallBack"></param> backtoryCallBack callback notified upon receiving server response or any error in the
+            process. Server response is a a LeaderBoardResponse object presenting players info
+            wrapped in a <see cref="T:Backtory.Core.Public.BacktoryResponse`1"/>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryLeaderBoard.GetPlayersAroundMe(System.Int32)">
+            <summary>
+            Synchronously gets players in leaderboard who are around of current user.
+            </summary>
+            <param name="count">number of players around of current user you want to receive. Half of this number
+                         would be on top of current user and half would be under. Limited to 20.</param> 
+            <returns> callback notified upon receiving server response or any error in the
+            process. Server response is a a LeaderBoardResponse object presenting players info
+            wrapped in a <see cref="T:Backtory.Core.Public.BacktoryResponse`1"/></returns>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryLeaderBoard.GetPlayersAroundMeInBackground(System.Int32,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardResponse}})">
+            <summary>
+            Gets players in leaderboard who are around of current user in background.
+            </summary>
+            <param name="count">number of players around of current user you want to receive. Half of this number
+                         would be on top of current user and half would be under. Limited to 20.</param>
+            <param name="callback"> callback notified upon receiving server response or any error in the
+            process. Server response is a a LeaderBoardResponse object presenting players info
+            wrapped in a <see cref="T:Backtory.Core.Public.BacktoryResponse`1"/></param>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardResponse">
+            <summary>
+            Contains a number of players info and score from a leaderboard
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardResponse.UsersProfile">
+            <summary>
+            Contains info about the players in leaderboard.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardResponse.Message">
+            
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardRank">
+            <summary>
+            Information about a player's rank in a leaderboard and scores he's gained on different fields.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardRank.Rank">
+            <summary>
+            Player rank in the leaderboard
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryLeaderBoard.LeaderBoardRank.Scores">
+            <summary>
+            Score of player regarding to each (max to 3) leaderboard's field. Its length is always three but
+            If leaderboard has for example one associated field, the last two number are zero.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryLeaderBoard.UserProfile">
+            <summary>
+            Contains personal information and of a player in this leaderboard along with scores he's
+            gained from different fields.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryLeaderBoard.UserProfile.UserBriefProfile">
+            <summary>
+            Personal info about the leaderboard member
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryLeaderBoard.UserProfile.Scores">
+            <summary>
+            Score of player regarding to each (max to 3) leaderboard's field. Its length is always three but
+            If leaderboard has for example one associated field, the last two number are zero.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryLeaderBoard.UserBriefProfile">
+            <summary>
+            Personal info about a leaderboard member.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.IGlobalEventListener">
+            <summary>
+            A place for handling SDK-scoped events. A typical usage could be redirecting user to login scene/page 
+            on receiving logout event.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryHttpStatusCode">
+            <summary>
+            Simple explanation for backtory responses status code. A successful request has status code betwee
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryChallenge.SetOnChallengeInvitationListener(System.Action{Backtory.Core.Public.BacktoryChallenge})">
+            <summary>
+            Tells the SDK what to do when an invitation to challenge comes. In most of use cases the best place
+            for calling this, is right after calling <see cref="M:Backtory.Core.Public.BacktoryClient.StartRealtimeService(Backtory.Core.Public.BacktoryConnectionStatusListener)"/>
+            </summary>
+            <param name="onChallengeInvitation">An action, called when an invitation comes. On Unity it executes
+            on main thread so UI elements could be modified in it without problem.
+            </param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryChallenge.#ctor(System.String)">
+            <summary>
+            For challenging other players use <see cref="M:Backtory.Core.Public.BacktoryChallenge.CreateNew(System.Collections.Generic.IList{System.String},System.Int32,System.Int32,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryChallenge}},System.String,System.String,System.String)"/>
+            </summary>
+            <param name="challengeId"></param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryChallenge.CreateNew(System.Collections.Generic.IList{System.String},System.Int32,System.Int32,System.Action{Backtory.Core.Public.IBacktoryResponse{Backtory.Core.Public.BacktoryChallenge}},System.String,System.String,System.String)">
+            <summary>
+            Sends challenge requests for given userIds
+            </summary>
+            <param name="usersToChallenge">List of user ids to challenge</param>
+            <param name="minPlayersToStart">If fewer players accept the challenge, challenge wont start</param>
+            <param name="expirationTime">Life span of challenge in seconds. Note that maximum for this number is 15 minutes (900 seconds).</param>
+            <param name="challengeMessage">A welcome message for challenged users. Something like "catch me if you can! :DD"</param>
+            <param name="challengeName">A name for challenge which helps creating different types of challenge.</param>
+            <param name="metaData">An optional and arbitrary string which will be sent to challenge recipients. Good place for sending username, name, age etc.</param>
+            <param name="callback"></param>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryMatch">
+            <summary>
+            A BacktoryMatch is a bunch of players set to begin a realtime game. They are matched either from a matchmaking or challenge.
+            This class contains result data of the corresponding matchmaking or challenge and is needed for starting a <seealso cref="T:Backtory.Core.Public.BacktoryRealtimeGame"/>
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.BacktoryMatch.MatchParticipants">
+            <summary>
+            UserIds of players participating this match.
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.BacktoryMatch.ExtraMessage">
+            <summary>
+            Filled by Webhooks. Arbitrary string
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.BacktoryMatch.MatchRequestId">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryMatch.#ctor(System.String,System.String,System.Collections.Generic.IList{Backtory.Core.Public.BacktoryMatchParticipant},System.String,System.String)">
+            <summary>
+            A BacktoryMatch represent a collection of backtory users, matched to play a game. 
+            It could be result of a matchmaking or challenge.
+            </summary>
+            <param name="address">Address of Backtory realtime websocket instance.</param>
+            <param name="matchId">A unique id for a match. Generated by the Backtory server.</param>
+            <param name="matchParticipants">A list of Backtory users matched to play a game.</param>
+            <param name="extraMessage">When using MatchFoundWebhook, this field would be the result of that webhook.</param>
+            <param name="matchRequestId">A unique id for which server assigns to matchmaking or challenge request.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryMatchMaking.Request(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Requests a matchmaking with given parameters. Result of the process would be either 
+            <see cref="T:Backtory.Core.Public.BacktoryMatchFoundMessage"/> or <see cref="T:Backtory.Core.Public.BacktoryMatchNotFoundMessage"/>
+            which you can be informed of by setting your action to <see cref="P:Backtory.Core.Public.BacktoryMatchMaking.OnMatchFound"/>
+            and <see cref="P:Backtory.Core.Public.BacktoryMatchMaking.OnMatchNotFound"/>.
+            </summary>
+            <param name="matchMakingName"></param>
+            <param name="playerSkill"></param>
+            <param name="metaData"></param>
+            <param name="callback"></param>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryChat.Direct.ReceiverUserId">
+            <summary>
+            UserId of whom this message must send to.
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryChat.Direct.#ctor(System.String)">
+            <summary>
+            A 2-Player chat. 
+            </summary>
+            <param name="receiverUserId"> UserId of whom this message must deliver to.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryChat.Group.History(System.Int64,System.Action{Backtory.Core.Public.IBacktoryResponse{System.Collections.Generic.IList{Backtory.Core.Public.AbsGroupChatMessage}}})">
+            <summary>
+            Fetches messages sent to this group (chat message, user joined, etc) 
+            before the date-time specified by <paramref name="lastDate"/> in descending order of
+            sent time.
+            </summary>
+            <param name="lastDate">A time filter for messages in form of millisecond since 1/1/1970.
+            Response message are all of this group messages sent before this landmark.
+            </param>
+            <param name="callback"></param>
+            <example>
+            It's often the whole history of group which is needed,
+            <code>
+            DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var now = (long)(DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
+            History(now, response => {/*...all of this group history*/})
+            </code>
+            </example>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryConnectivityMessageListener.OnAllMessages">
+            <summary>
+            called on every message. suitable for log prints
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryUserRemovedFromGroupMessage.RemoverUserId">
+            <summary>
+            UserId of the person who has removed the <see cref="P:Backtory.Core.Public.BacktoryUserRemovedFromGroupMessage.RemovedUserId"/> from group.
+            </summary>
+        </member>
+        <member name="T:Backtory.Core.Public.BacktoryGlobalChatMessage">
+            <summary>
+            This kind of chat is in beta state. Don't use it without contacting us
+            </summary>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.Join(Backtory.Core.Public.BacktoryConnectionStatusListener)">
+            <summary>
+            
+            </summary>
+            <param name="connectionListener">Listener for underlying socket events. Note that this doesn't show the state of game.
+            For knowing the game state refer to <see cref="P:Backtory.Core.Public.BacktoryRealtimeGame.State"/>
+            </param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.SendDirectMessage(System.String,System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            
+            </summary>
+            <param name="userId"></param>
+            <param name="message"></param>
+            <param name="callback"></param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.SendPublicMessage(System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Typically for sending chat messages to everyone in match but could be used anytime
+            you want send data to all players. 
+            </summary>
+            <param name="message">A string to be send to all players in match</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.SendGameEvent(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.Boolean)">
+            <summary>
+            Typically for sending a player moves to all other players but could be used for sending whatever kinds of 
+            message. <b>Pay attention that you can use this only when match is started and no one has left yet, 
+            otherwise request fails.</b>
+            </summary>
+            <param name="message"></param>
+            <param name="data">Whatever data you want to send to all players in key-value format. Typically player moves.</param>
+            <param name="ignoreWebhook">Setting this to true bypasses the 'Event Webhook'. This typically is useful when you have
+            'Sync Event Webhook' enable in your settings but sometimes need to ignore the webhook to get a better response time.</param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.SendWinners(System.Collections.Generic.IList{System.String},System.String,System.Action{Backtory.Core.Public.IBacktoryResponse})">
+            <summary>
+            Determines winners of this match. A realtime match/game can have different winners from players respects
+            more often when game logic is handled client-side. You send winners from your respect and backtory realtime 
+            service decides which players are real winners based on your setting of matchmaking in your backtory panel.
+            </summary>
+            <param name="winners">List of those players Ids you found as winners if this match/game.</param>
+            <param name="extraData">Any string. Server delivers it back to you when match ends in <see cref="T:Backtory.Core.Public.BacktoryGameEndedMessage"/></param>
+        </member>
+        <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.Leave">
+            <summary>
+            Leaves the match/game and closes the underlying socket. Not calling this at the end of your game may cost you money!
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.GameStateEnum.None">
+            <summary>
+            Initial state.
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.GameStateEnum.Connected">
+            <summary>
+            Connection to server established.
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.GameStateEnum.Started">
+            <summary>
+            Game started. All of players have joined.
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.GameStateEnum.Ended">
+            <summary>
+            Game has ended. All of players have sent their result of the match.
+            </summary>
+        </member>
+        <member name="F:Backtory.Core.Public.GameStateEnum.Disconnected">
+            <summary>
+            Player has left the game and connection to server is closed.
+            </summary>
+        </member>
+        <member name="P:Backtory.Core.Public.BacktoryRealtimMessageListener.OnAllMessages">
+            <summary>
+            called on every message. suitable for log prints
+            </summary>
+        </member>
+        <member name="T:Backtory.Unity.BacktoryInitializeBehavior">
+            <summary>
+            A MonoBehavior that automatically initializes SDK using developers settings set in 'Backtory' menu inspector.
+            </summary>
+        </member>
+        <member name="T:Backtory.Utilities.FlexibleDictionaryWrapper`2">
+            <summary>
+            Provides a Dictionary implementation that can delegate to any other
+            dictionary, regardless of its value type. Used for coercion of
+            dictionaries when returning them to users.
+            </summary>
+            <typeparam name="TOut">The resulting type of value in the dictionary.</typeparam>
+            <typeparam name="TIn">The original type of value in the dictionary.</typeparam>
+        </member>
+        <member name="T:Backtory.Utilities.FlexibleListWrapper`2">
+            <summary>
+            Provides a List implementation that can delegate to any other
+            list, regardless of its value type. Used for coercion of
+            lists when returning them to users.
+            </summary>
+            <typeparam name="TOut">The resulting type of value in the list.</typeparam>
+            <typeparam name="TIn">The original type of value in the list.</typeparam>
+        </member>
+        <member name="T:Backtory.Utilities.Conversion">
+            <summary>
+            A set of utilities for converting generic types between each other.
+            </summary>
+        </member>
+        <member name="M:Backtory.Utilities.Conversion.As``1(System.Object)">
+             <summary>
+             Converts a value to the requested type -- coercing primitives to
+             the desired type, wrapping lists and dictionaries appropriately,
+             or else returning null.
+            
+             This should be used on any containers that might be coming from a
+             user to normalize the collection types. Collection types coming from
+             JSON deserialization can be safely assumed to be lists or dictionaries of
+             objects.
+             </summary>
+        </member>
+        <member name="M:Backtory.Utilities.Conversion.To``1(System.Object)">
+             <summary>
+             Converts a value to the requested type -- coercing primitives to
+             the desired type, wrapping lists and dictionaries appropriately,
+             or else throwing an exception.
+            
+             This should be used on any containers that might be coming from a
+             user to normalize the collection types. Collection types coming from
+             JSON deserialization can be safely assumed to be lists or dictionaries of
+             objects.
+             </summary>
+        </member>
+        <member name="M:Backtory.Utilities.Conversion.ConvertTo``1(System.Object)">
+             <summary>
+             Converts a value to the requested type -- coercing primitives to
+             the desired type, wrapping lists and dictionaries appropriately,
+             or else passing the object along to the caller unchanged.
+            
+             This should be used on any containers that might be coming from a
+             user to normalize the collection types. Collection types coming from
+             JSON deserialization can be safely assumed to be lists or dictionaries of
+             objects.
+             </summary>
+        </member>
+        <member name="F:Backtory.Utilities.Conversion.interfaceLookupCache">
+             <summary>
+             Holds a dictionary that maps a cache of interface types for related concrete types.
+             The lookup is slow the first time for each type because it has to enumerate all interface
+             on the object type, but made fast by the cache.
+            
+             The map is:
+                (object type, generic interface type) => constructed generic type
+             </summary>
+        </member>
+        <member name="T:Backtory.Utilities.PreserveAttribute">
+            <summary>
+            A reimplementation of Xamarin's PreserveAttribute.
+            This allows us to support AOT and linking for Xamarin platforms.
+            </summary>
+        </member>
+        <member name="M:Backtory.Utilities.PreserveWrapperTypes.CreateWrapperTypes">
+             <summary>
+             Exists to ensure that generic types are AOT-compiled for the conversions we support.
+             Any new value types that we add support for will need to be registered here.
+             The method itself is never called, but by virtue of the Preserve attribute being set
+             on the class, these types will be AOT-compiled.
+            
+             This also applies to Unity.
+             </summary>
+        </member>
+        <member name="T:Backtory.Utilities.ReflectionHelpers">
+            <summary>
+            Unity and portable class libraries varies in many of the reflection API. 
+            This class unifies the reflection API for all platforms using <c>#ifdef</c> directives.
+            </summary>
+        </member>
+        <member name="M:Backtory.Utilities.ReflectionHelpers.FindConstructor(System.Type,System.Type[])">
+            <summary>
+            This method helps simplify the process of getting a constructor for a type.
+            A method like this exists in .NET but is not allowed in a Portable Class Library,
+            so we've built our own.
+            </summary>
+            <param name="self"></param>
+            <param name="parameterTypes"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Backtory.Utilities.Utils.GetFieldsByAttibute(System.Type,System.Object,System.Boolean)">
+            <summary>
+            Returns all the fields annotated with the passed attribute. If obj is null, search on static fields only
+            </summary>
+            <param name="attributeType"></param>
+            <param name="obj"></param>
+            <param name="considerInheritedFields"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Backtory.Utilities.Utils.GetPropertiesByAttribute(System.Type,System.Object,System.Boolean)">
+            <summary>
+            Returns all the properties annotated with the passed attribute. If obj is null, search on static properties only
+            </summary>
+            <param name="attributeType"></param>
+            <param name="obj"></param>
+            <param name="considerInheritedFields"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Backtory.Utilities.Utils.GetFieldByAttribute(System.Type,System.Object,System.Boolean)">
+            <summary>
+            Returns the single field annotated with the passed attribute. If obj is null, search on static fields only
+            If no such field returns null. If more than one throws exception.
+            </summary>
+            <param name="attributeType"></param>
+            <param name="obj"></param>
+            <param name="considerInheritedFields"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Backtory.Utilities.Utils.GetPropertyByAttribute(System.Type,System.Object,System.Boolean)">
+            <summary>
+            Returns the single property annotated with the passed attribute. If obj is null, search on static property only
+            If no such property, returns null. If more than one throws exception.
+            </summary>
+            <param name="attributeType"></param>
+            <param name="obj"></param>
+            <param name="considerInheritedFields"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

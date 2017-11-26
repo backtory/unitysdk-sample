@@ -4,10 +4,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.IO;
-using RestSharp;
+using Backtory.InAppPurchase.Public;
 
 namespace Assets.BacktorySample
 {
@@ -44,6 +43,12 @@ namespace Assets.BacktorySample
 		// Realtime Module
 		public InputField messageInput;
 
+		// CafeBazaar IAP Module
+		public Dropdown ItemTypesDropdown;
+		public Dropdown SecurityTypesDropdown;
+		
+		
+		
 		void Awake ()
 		{
 		}
@@ -55,7 +60,6 @@ namespace Assets.BacktorySample
 		// Use this for initialization
 		void Start ()
 		{
-			
 		}
 
 		// Update is called once per frame
@@ -161,10 +165,10 @@ namespace Assets.BacktorySample
 
 		public void onSearchCloudCode ()
 		{
-			BacktoryCloudcode.RunInBackground<Person> ("hello", new Info () { id = "453" }, response => {
+			BacktoryCloudcode.RunInBackground<Person> ("hello", new Info () { Id = "453" }, response => {
 				if (response.Successful) {
 					Person person = response.Body;
-					ResultText.text = "Search result.\nname: " + person.name;
+					ResultText.text = "Search result.\nname: " + person.Name;
 				} else
 					ResultText.text = "Search failed;\n" + response.Code + " " + ((BacktoryHttpStatusCode)response.Code).ToString ();
 			});
@@ -172,14 +176,13 @@ namespace Assets.BacktorySample
 
 		public class Info
 		{
-			public string id { get; set; }
+			public string Id { get; set; }
 		}
 
 		public class Person
 		{
-			public string name { get; set; }
-
-			public int age { get; set; }
+			public string Name { get; set; }
+			public int Age { get; set; }
 		}
 
 
@@ -367,19 +370,24 @@ namespace Assets.BacktorySample
 		}
 
 		public void requestMatch() {
-			mm = new BacktoryMatchMaking (categoryInput.text, int.Parse(skillInput.text));
-			mm.OnMatchFound = (match) => {
-				MessageText.text = "Match found!\n" + 
-					JsonConvert.SerializeObject (match, Formatting.Indented, JsonnetSetting ());
-				setupRealtimeGame(match);
-			};
-			mm.OnMatchmakingUpdate = (mmUpdateMessage) => {
-				MessageText.text = "Matchmaking update received!\n" + 
-					JsonConvert.SerializeObject (mmUpdateMessage, Formatting.Indented, JsonnetSetting ());
-			};
-			mm.OnMatchNotFound = (message) => {
-				MessageText.text = "Match not found!\n" + 
-					JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
+			mm = new BacktoryMatchMaking(categoryInput.text, int.Parse(skillInput.text))
+			{
+				OnMatchFound = (match) =>
+				{
+					MessageText.text = "Match found!\n" +
+					                   JsonConvert.SerializeObject(match, Formatting.Indented, JsonnetSetting());
+					setupRealtimeGame(match);
+				},
+				OnMatchmakingUpdate = (mmUpdateMessage) =>
+				{
+					MessageText.text = "Matchmaking update received!\n" +
+					                   JsonConvert.SerializeObject(mmUpdateMessage, Formatting.Indented, JsonnetSetting());
+				},
+				OnMatchNotFound = (message) =>
+				{
+					MessageText.text = "Match not found!\n" +
+					                   JsonConvert.SerializeObject(message, Formatting.Indented, JsonnetSetting());
+				}
 			};
 
 			mm.Request ("metaData", (response) => {
@@ -513,57 +521,61 @@ namespace Assets.BacktorySample
 		 */
 		BacktoryRealtimeGame realtimeGame;
 
-		private void setupRealtimeGame(BacktoryMatch match) {
+		private void setupRealtimeGame(BacktoryMatch match)
+		{
 			this.GetComponent<UIController> ().enableRealtimeModule ();
 
-			realtimeGame = new BacktoryRealtimeGame (match);
-			realtimeGame.OnGameEvent = (message) => {
-				MessageText.text = "Game event received!\n" + 
-					JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
-			};
-			realtimeGame.OnDirectMessage = (message) => {
-				MessageText.text = "Direct chat received.\n" + 
-					JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
-			};
-			realtimeGame.OnError = (message) => {
-				MessageText.text = "Error occurred!\n" + 
-					JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
-			};
-			realtimeGame.OnGameEnded = (message) => {
-				MessageText.text = "Game ended!\n" + 
-					JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
-			};
-			realtimeGame.OnGameStarted = () => {
-				MessageText.text = "Game started !!!!!!!!!!";
-			};
-			realtimeGame.OnGameStartedWebhook = (message) => {
-				Debug.Log("Your start webhook returned this message: " + message);
-			};
-			realtimeGame.OnPlayerJoined = (message) => {
-				MessageText.text = "Player joined the game!\n" + 
-					JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
-			};
-			realtimeGame.OnPlayerJoinedWebhook = (message) => {
-				Debug.Log("Your join webhook sent this message to you: " + message);
-			};
-			realtimeGame.OnPlayerLeft = (message) => {
-				MessageText.text = "Player left the game!\n" + 
-					JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
-			};
-			realtimeGame.OnPublicMessage = (message) => {
-				MessageText.text = "Public message received!\n" + 
-					JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
-			};
-			realtimeGame.OnServerMessage = (message) => {
-				MessageText.text = "Server message received!\n" + 
-					JsonConvert.SerializeObject (message, Formatting.Indented, JsonnetSetting ());
-			};
-			realtimeGame.OnWebHookError = (message) => {
-				Debug.Log ("Error in server webhook: " + message);
+			realtimeGame = new BacktoryRealtimeGame(match)
+			{
+				OnGameEvent = (message) =>
+				{
+					MessageText.text = "Game event received!\n" +
+					                   JsonConvert.SerializeObject(message, Formatting.Indented, JsonnetSetting());
+				},
+				OnDirectMessage = (message) =>
+				{
+					MessageText.text = "Direct chat received.\n" +
+					                   JsonConvert.SerializeObject(message, Formatting.Indented, JsonnetSetting());
+				},
+				OnError = (message) =>
+				{
+					MessageText.text = "Error occurred!\n" +
+					                   JsonConvert.SerializeObject(message, Formatting.Indented, JsonnetSetting());
+				},
+				OnGameEnded = (message) =>
+				{
+					MessageText.text = "Game ended!\n" +
+					                   JsonConvert.SerializeObject(message, Formatting.Indented, JsonnetSetting());
+				},
+				OnGameStarted = () => { MessageText.text = "Game started !!!!!!!!!!"; },
+				OnGameStartedWebhook = (message) => { Debug.Log("Your start webhook returned this message: " + message); },
+				OnPlayerJoined = (message) =>
+				{
+					MessageText.text = "Player joined the game!\n" +
+					                   JsonConvert.SerializeObject(message, Formatting.Indented, JsonnetSetting());
+				},
+				OnPlayerJoinedWebhook = (message) => { Debug.Log("Your join webhook sent this message to you: " + message); },
+				OnPlayerLeft = (message) =>
+				{
+					MessageText.text = "Player left the game!\n" +
+					                   JsonConvert.SerializeObject(message, Formatting.Indented, JsonnetSetting());
+				},
+				OnPublicMessage = (message) =>
+				{
+					MessageText.text = "Public message received!\n" +
+					                   JsonConvert.SerializeObject(message, Formatting.Indented, JsonnetSetting());
+				},
+				OnServerMessage = (message) =>
+				{
+					MessageText.text = "Server message received!\n" +
+					                   JsonConvert.SerializeObject(message, Formatting.Indented, JsonnetSetting());
+				},
+				OnWebHookError = (message) => { Debug.Log("Error in server webhook: " + message); }
 			};
 		}
 
-		public void joinGame() {
+		public void joinGame()
+		{
 			if (realtimeGame == null) {
 				ResultText.text = "No game is available.";
 				return;
@@ -571,7 +583,8 @@ namespace Assets.BacktorySample
 			realtimeGame.Join ();
 		}
 
-		public void sendEvent() {
+		public void sendEvent()
+		{
 			if (realtimeGame == null) {
 				ResultText.text = "No game is available.";
 				return;
@@ -580,7 +593,8 @@ namespace Assets.BacktorySample
 			realtimeGame.SendGameEvent(messageInput.text, data);
 		}
 
-		public void directMessage() {
+		public void directMessage()
+		{
 			if (realtimeGame == null) {
 				ResultText.text = "No game is available.";
 				return;
@@ -603,7 +617,8 @@ namespace Assets.BacktorySample
 			});
 		}
 
-		public void sendChatToMatch() {
+		public void sendChatToMatch()
+		{
 			if (realtimeGame == null) {
 				ResultText.text = "No game is available.";
 				return;
@@ -613,7 +628,8 @@ namespace Assets.BacktorySample
 			});
 		}
 
-		public void sendMatchResult() {
+		public void sendMatchResult() 
+		{
 			if (realtimeGame == null) {
 				ResultText.text = "No game is available.";
 				return;
@@ -624,7 +640,8 @@ namespace Assets.BacktorySample
 			});
 		}
 
-		public void leaveGame() {
+		public void leaveGame() 
+		{
 			if (realtimeGame == null) {
 				ResultText.text = "No game is available.";
 				return;
@@ -638,7 +655,8 @@ namespace Assets.BacktorySample
 		/* 
 		 * Person-to-Person Chat 
 		 */
-		public void loginChatUser() {
+		public void loginChatUser()
+		{
 			BacktoryUser.LoginInBackground(testUser1.username, testUser1.password, (IBacktoryResponse response) => {
 				ResultText.text = response.Successful ? "Chat user login succeeded" : "failed; " + response.Message;
 				BacktoryChat.Direct.SetOnReceivingMessageListener ((message) => {
@@ -672,7 +690,8 @@ namespace Assets.BacktorySample
 			});
 		}
 			
-		public void sendChatMessage() {
+		public void sendChatMessage()
+		{
 			int id = UnityEngine.Random.Range (0, 10);
 			BacktoryChat.Direct dc = new BacktoryChat.Direct (testUser1.userId);
 			dc.SendMessage ("Working! " + id, (response) => {
@@ -680,16 +699,19 @@ namespace Assets.BacktorySample
 			});
 		}
 
-		public void requestOfflineChats() {
+		public void requestOfflineChats()
+		{
 			BacktoryChat.OfflineMessages (PrintCallBack<IList<AbsChatMessage>>());
 		}
 
-		public static long CurrentTimeMillis() {
+		public static long CurrentTimeMillis()
+		{
 			DateTime Jan1st1970 = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 			return (long) (DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
 		}
 
-		public void requestChatHistory () {
+		public void requestChatHistory ()
+		{
 			BacktoryChat.Direct dc = new BacktoryChat.Direct (testUser2.userId);
 			dc.History (CurrentTimeMillis(), PrintCallBack<IList<BacktoryDirectChatMessage>>());
 		}
@@ -700,14 +722,16 @@ namespace Assets.BacktorySample
 		 */
 		private string myGroupId = "58c1a989e4b07d84e2ebde2d";
 
-		public void createChatGroup() {
+		public void createChatGroup() 
+		{
 			int id = UnityEngine.Random.Range (0, 10);
 			BacktoryChat.Group.CreateNewGroup ("MyGroup" + id, BacktoryChat.Group.Mode.Private,
 				PrintCallBack<BacktoryChat.Group>());
 			
 		}
 
-		public void requestGroupsList() {
+		public void requestGroupsList()
+		{
 			BacktoryChat.Group.MyGroups ((response) => {
 				if (response.Successful)	
 					ResultText.text = JsonConvert.SerializeObject (response.Body, Formatting.Indented, JsonnetSetting ());
@@ -716,47 +740,54 @@ namespace Assets.BacktorySample
 			});
 		}
 
-		public void requestMembersList() {
+		public void requestMembersList()
+		{
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.MembersInfo (PrintCallBack<IList<BacktoryGroupMemberInfo>>());
 		}
 
-		public void addGroupMember() {
+		public void addGroupMember()
+		{
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.AddMember (testUser1.userId, (response) => {
 				ResultText.text = response.Successful ? "Add group member succeeded." : "failed; " + response.Message;
 			});	
 		}
 
-		public void removeGroupMember() {
+		public void removeGroupMember()
+		{
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.RemoveMember (testUser1.userId, (response) => {
 				ResultText.text = response.Successful ? "Remove group member succeeded." : "failed; " + response.Message;
 			});
 		}
 
-		public void sendChatToGroup() {
+		public void sendChatToGroup() 
+		{
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.SendMessage ("Hello Everybody!", (response) => {
 				ResultText.text = response.Successful ? "Send chat to group succeeded." : "failed; " + response.Message;
 			});
 		}
 
-		public void requestGroupChatHistory() {
+		public void requestGroupChatHistory()
+		{
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.History(CurrentTimeMillis(), PrintCallBack<IList<AbsGroupChatMessage>>());
 		}
 
 		string invitedGroupId;
 
-		public void inviteToGroup() {
+		public void inviteToGroup() 
+		{
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.InviteToGroup (testUser1.userId,  (response) => {
 				ResultText.text = response.Successful ? "Invitation to group chat succeeded." : "failed; " + response.Message;
 			});
 		}
 
-		public void joinGroup() {
+		public void joinGroup()
+		{
 			if (invitedGroupId == null) {
 				ResultText.text = "Invited group id is null.";
 				return;
@@ -768,22 +799,212 @@ namespace Assets.BacktorySample
 			});
 		}
 
-		public void leaveGroup() {
+		public void leaveGroup()
+		{
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.LeaveGroup ((response) => {
 				ResultText.text = response.Successful ? "Left the group chat successfully!" : "failed; " + response.Message;
 			});
 		}
 
-		public void makeMemberOwner() {
+		public void makeMemberOwner()
+		{
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.MakeMemberOwner (testUser1.userId, (response) => {
 				ResultText.text = response.Successful ? "Member is owner now!" : "failed; " + response.Message;
 			});
 		}
 
+
+		
+		
+		
+		/* 
+		 * CafeBazaar In-app Purchase 
+		 */
+		private BacktoryIap _backtoryIap;
+
+		internal class BacktoryIapListenerImpl : IBacktoryIapListener
+		{
+			private readonly Sample _sample;
+			
+			public BacktoryIapListenerImpl(Sample sample)
+			{
+				_sample = sample;
+			}
+			
+			public void OnGetSkuDetailsFinished(IapResult result, IList<SkuDetails> skuDetailsList)
+			{
+				_sample.ResultText.text = JsonConvert.SerializeObject
+					(result, Formatting.Indented, JsonnetSetting ()) + "\n" + 
+				                   JsonConvert.SerializeObject
+					                   (skuDetailsList, Formatting.Indented, JsonnetSetting ());
+			}
+
+			public void OnGetPurchasesFinished(IapResult result, IList<string> ownedSkus, string continuationToken)
+			{
+				_sample.ResultText.text = JsonConvert.SerializeObject
+					                   (result, Formatting.Indented, JsonnetSetting ()) + "\n" + 
+				                   JsonConvert.SerializeObject
+					                   (ownedSkus, Formatting.Indented, JsonnetSetting ()) + "\n" + 
+									"continuationToken: " + continuationToken;				
+			}
+
+			public void OnPurchaseFinished(IapResult result, Purchase purchase, string webhookMessage)
+			{
+				_sample.ResultText.text = JsonConvert.SerializeObject
+					                          (result, Formatting.Indented, JsonnetSetting ()) + "\n" + 
+				                          JsonConvert.SerializeObject
+					                          (purchase, Formatting.Indented, JsonnetSetting ()) + "\n" +
+																	"webhookMessage: " + webhookMessage;
+				if (result.ResultCode == IapResult.SUCCESS)
+				{
+					_sample.PurchaseToken = purchase.PurchaseToken;
+				}
+			}
+
+			public void OnConsumptionFinished(IapResult result, string sku, string purchaseToken, string webhookMessage)
+			{
+				_sample.ResultText.text = JsonConvert.SerializeObject
+					                          (result, Formatting.Indented, JsonnetSetting()) + "\n" +
+				                          "sku: " + sku + "\n" +
+				                          "purchaseToken: " + purchaseToken + "\n" +
+																	"webhookMessage: " + webhookMessage;
+				if (result.ResultCode == IapResult.SUCCESS)
+				{
+					_sample.PurchaseToken = null;
+				}
+			}
+
+			public void OnSubscriptionFinished(IapResult result, Purchase purchase, string webhookMessage)
+			{
+				_sample.ResultText.text = JsonConvert.SerializeObject
+					                          (result, Formatting.Indented, JsonnetSetting ()) + "\n" + 
+				                          JsonConvert.SerializeObject
+					                          (purchase, Formatting.Indented, JsonnetSetting ()) + "\n" +
+				                          "webhookMessage: " + webhookMessage;
+			}
+		}
+		
+		private void CreateBacktoryIapCoreInstance()
+		{
+			Debug.Log("Creating backtory iap core instance ...");
+			var iapBehaviour = GameObject.Find("BacktoryInitializeBahaviour")
+				.GetComponent<BacktoryIapBehaviour>();
+			_backtoryIap = new BacktoryIap(iapBehaviour,
+				new BacktoryIapListenerImpl(this), "ir.pegahtech.backtory.sdksample");
+		}
+		
+		
+		public void GetSkuDetails()
+		{
+			if (_backtoryIap == null)
+			{
+				CreateBacktoryIapCoreInstance();
+			}
+
+			var skuList = new List<string> {"gas"}; 
+			_backtoryIap.GetSkuDetailsInBackground(skuList);
+		}
+
+		public void GetPurchases()
+		{
+			if (_backtoryIap == null)
+			{
+				CreateBacktoryIapCoreInstance();
+			}
+			
+			var bazaarItemType = ItemTypesDropdown.captionText.text;
+			_backtoryIap.GetPurchases(bazaarItemType, null);
+		}
+
+		public string PurchaseToken { get; set; }
+
+		public void PurchaseItem()
+		{
+			if (_backtoryIap == null)
+			{
+				CreateBacktoryIapCoreInstance();
+			}
+
+			var securityType = SecurityTypesDropdown.value;
+			if (securityType == 0) 	// secure
+			{
+				_backtoryIap.SecurePurchase("gas", "Nothing to say.");
+			}
+			else 					// insecure
+			{
+				_backtoryIap.InsecurePurchase("gas");
+			}
+			
+		}
+
+		public void ConsumeItem()
+		{
+			if (_backtoryIap == null)
+			{
+				CreateBacktoryIapCoreInstance();
+			}
+
+			if (PurchaseToken == null)
+			{
+				ResultText.text = "No purchaseToken is available!";
+				return;
+			}
+			
+			var securityType = SecurityTypesDropdown.value;
+			if (securityType == 0)
+			{
+				_backtoryIap.SecureConsume("gas", PurchaseToken, "Nothing to say.");
+			}
+			else
+			{
+				_backtoryIap.InsecureConsume("gas", PurchaseToken);
+			}
+			
+		}
+
+		public void UpgradeToPremium()
+		{
+			if (_backtoryIap == null)
+			{
+				CreateBacktoryIapCoreInstance();
+			}
+			
+			var securityType = SecurityTypesDropdown.value;
+			if (securityType == 0)
+			{
+				_backtoryIap.SecurePurchase("premium", "Nothing to say.");
+			}
+			else
+			{
+				_backtoryIap.InsecurePurchase("premium");	
+			}
+		}
+
+		public void Subscribe()
+		{
+			if (_backtoryIap == null)
+			{
+				CreateBacktoryIapCoreInstance();
+			}
+			
+			var securityType = SecurityTypesDropdown.value;
+			if (securityType == 0)
+			{
+				_backtoryIap.SecureSubscribe("infinite_gas", "Nothing to say.");
+			}
+			else
+			{
+				_backtoryIap.InsecureSubscribe("infinite_gas");
+			}
+		}
 		#endregion
 
+		
+		
+		
+		
 		#region sample stuff
 
 		private class TestUser
@@ -824,7 +1045,7 @@ namespace Assets.BacktorySample
 			};
 		}
 
-		private JsonSerializerSettings JsonnetSetting ()
+		private static JsonSerializerSettings JsonnetSetting ()
 		{
 			return new JsonSerializerSettings () {
 				MissingMemberHandling = MissingMemberHandling.Ignore,
