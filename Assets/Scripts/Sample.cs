@@ -888,11 +888,10 @@ namespace Assets.BacktorySample
 		
 		private void CreateBacktoryIapCoreInstance()
 		{
-			Debug.Log("Creating backtory iap core instance ...");
-			var iapBehaviour = GameObject.Find("BacktoryInitializeBahaviour")
-				.GetComponent<BacktoryIapBehaviour>();
-			_backtoryIap = new BacktoryIap(iapBehaviour,
-				new BacktoryIapListenerImpl(this), "ir.pegahtech.backtory.sdksample");
+			Debug.Log("Creating backtory iap instance ...");
+			var rsaPublicKey = "MIHNMA0GCSqGSIb3DQEBAQUAA4G7ADCBtwKBrwCqHO8g69NoeAMvj34Abqd+ZLkKTH8ScUBk+Q3YuMwTV1avn3PAZ9/PA30aomxFurWfLa5FS/tgUTw+v+O+3ZtEwW9n86PBIrciHqkGGac1PM/3dutFjmlGbT+bcUrO2LXFoTcb/udIEiIcGpjWkwESmpSPE/GzNqU4Z5gvWwWxTKBzyzEnWXebk7p0p7HdhYqpiv0xcz8OxGnB4hWM/z51nuByF+FPgaIgcj7B6pcCAwEAAQ==";
+			_backtoryIap = new BacktoryIap(rsaPublicKey, new BacktoryIapListenerImpl(this),
+					"ir.pegahtech.backtory.sdksample");
 		}
 		
 		
@@ -903,7 +902,7 @@ namespace Assets.BacktorySample
 				CreateBacktoryIapCoreInstance();
 			}
 
-			var skuList = new List<string> {"gas"}; 
+			var skuList = new List<string> {"gas", "premium"}; 
 			_backtoryIap.GetSkuDetailsInBackground(skuList);
 		}
 
@@ -930,11 +929,11 @@ namespace Assets.BacktorySample
 			var securityType = SecurityTypesDropdown.value;
 			if (securityType == 0) 	// secure
 			{
-				_backtoryIap.SecurePurchase("gas", "Nothing to say.");
+				_backtoryIap.SecurePurchase("gas", "dp1", "Nothing to say.");
 			}
 			else 					// insecure
 			{
-				_backtoryIap.InsecurePurchase("gas");
+				_backtoryIap.InsecurePurchase("gas", "dp1");
 			}
 			
 		}
@@ -974,11 +973,11 @@ namespace Assets.BacktorySample
 			var securityType = SecurityTypesDropdown.value;
 			if (securityType == 0)
 			{
-				_backtoryIap.SecurePurchase("premium", "Nothing to say.");
+				_backtoryIap.SecurePurchase("premium", "dp2", "Nothing to say.");
 			}
 			else
 			{
-				_backtoryIap.InsecurePurchase("premium");	
+				_backtoryIap.InsecurePurchase("premium", "dp2");	
 			}
 		}
 
@@ -992,11 +991,11 @@ namespace Assets.BacktorySample
 			var securityType = SecurityTypesDropdown.value;
 			if (securityType == 0)
 			{
-				_backtoryIap.SecureSubscribe("infinite_gas", "Nothing to say.");
+				_backtoryIap.SecureSubscribe("infinite_gas", "dp3", "Nothing to say.");
 			}
 			else
 			{
-				_backtoryIap.InsecureSubscribe("infinite_gas");
+				_backtoryIap.InsecureSubscribe("infinite_gas", "dp3");
 			}
 		}
 		#endregion

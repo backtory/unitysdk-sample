@@ -125,11 +125,6 @@
             json which will have bigger size.</param>
             <returns></returns>
         </member>
-        <member name="P:Backtory.Core.Internal.BacktoryJNode.AsJsonArray">
-            <summary>
-            Use this for classes with default constructor
-            </summary>
-        </member>
         <member name="M:Backtory.Core.Internal.ConfigableJsonNet.FromJson(System.String,System.Type)">
             <see cref="M:Backtory.Core.Internal.IJSON.FromJson(System.String,System.Type)"/>
         </member>
@@ -1062,12 +1057,12 @@
             Gets the name of the role.
             </summary>
         </member>
-        <member name="T:Backtory.Core.Public.BacktoryWebsocketMonitor">
+        <member name="T:Backtory.Core.Public.BacktoryConnectivityMonitor">
             <summary>
             This class has some utility method for measuring 'Backtory Realtime service' state and delay profiling.
             </summary>
         </member>
-        <member name="M:Backtory.Core.Public.BacktoryWebsocketMonitor.RTT(System.Action{System.Int64},System.String)">
+        <member name="M:Backtory.Core.Public.BacktoryConnectivityMonitor.RTD(System.Action{System.Int32},System.String)">
             <summary>
             RTD stands for 'round-trip delay time' and is the length of time it takes for a request to be sent 
             plus the length of time it takes for an acknowledgment of that request to be received.
@@ -1075,7 +1070,7 @@
             You can pass payload as body parameter to see the effect of request size in delay.
             </para>
             </summary>
-            <param name="callbcak">An action to be called with Backtory delay as its parameter. int.MaxValue indicates failure.</param>
+            <param name="callbcak">An action to be called with Backtory delay as its parameter. -1 indicates failure.</param>
             <param name="body">An arbitrary string to send as request body which server returns it intact.</param>
         </member>
         <member name="P:Backtory.Core.Public.BacktoryMatchFoundMessage.Address">
@@ -2070,6 +2065,17 @@
             Leaves the match/game and closes the underlying socket. Not calling this at the end of your game may cost you money!
             </summary>
         </member>
+        <member name="M:Backtory.Core.Public.BacktoryRealtimeGame.RTD(System.Action{System.Int32},System.String)">
+            <summary>
+            RTD stands for 'round-trip delay time' and is the length of time it takes for a request to be sent 
+            plus the length of time it takes for an acknowledgment of that request to be received.
+            <para>
+            You can pass payload as body parameter to see the effect of request size in delay.
+            </para>
+            </summary>
+            <param name="callbcak">An action to be called with Backtory delay as its parameter. -1 indicates failure.</param>
+            <param name="body">An arbitrary string to send as request body which server returns it intact.</param>
+        </member>
         <member name="F:Backtory.Core.Public.GameStateEnum.None">
             <summary>
             Initial state.
@@ -2100,7 +2106,7 @@
             called on every message. suitable for log prints
             </summary>
         </member>
-        <member name="T:Backtory.Unity.BacktoryInitializeBehavior">
+        <member name="T:Backtory.Unity.BacktoryInitializeBehaviour">
             <summary>
             A MonoBehavior that automatically initializes SDK using developers settings set in 'Backtory' menu inspector.
             </summary>
