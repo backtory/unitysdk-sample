@@ -720,7 +720,7 @@ namespace Assets.BacktorySample
 		/* 
 		 * Group Chat 
 		 */
-		private string myGroupId = "58c1a989e4b07d84e2ebde2d";
+		private string myGroupId = null;
 
 		public void createChatGroup() 
 		{
@@ -732,22 +732,36 @@ namespace Assets.BacktorySample
 
 		public void requestGroupsList()
 		{
-			BacktoryChat.Group.MyGroups ((response) => {
-				if (response.Successful)	
-					ResultText.text = JsonConvert.SerializeObject (response.Body, Formatting.Indented, JsonnetSetting ());
-				else
+			BacktoryChat.Group.MyGroups ((response) =>
+			{
+				if (response.Successful)
+				{
+					ResultText.text = JsonConvert.SerializeObject(response.Body, Formatting.Indented, JsonnetSetting());
+					if (response.Body.Count > 0)
+						myGroupId = response.Body[0].GroupId;
+				} else
 					ResultText.text = response.Message;
 			});
 		}
 
 		public void requestMembersList()
 		{
+			if (myGroupId == null)
+			{
+				ResultText.text = "my group id is null.";
+				return;
+			}
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.MembersInfo (PrintCallBack<IList<BacktoryGroupMemberInfo>>());
 		}
 
 		public void addGroupMember()
 		{
+			if (myGroupId == null)
+			{
+				ResultText.text = "my group id is null.";
+				return;
+			}
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.AddMember (testUser1.userId, (response) => {
 				ResultText.text = response.Successful ? "Add group member succeeded." : "failed; " + response.Message;
@@ -756,6 +770,11 @@ namespace Assets.BacktorySample
 
 		public void removeGroupMember()
 		{
+			if (myGroupId == null)
+			{
+				ResultText.text = "my group id is null.";
+				return;
+			}
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.RemoveMember (testUser1.userId, (response) => {
 				ResultText.text = response.Successful ? "Remove group member succeeded." : "failed; " + response.Message;
@@ -764,6 +783,11 @@ namespace Assets.BacktorySample
 
 		public void sendChatToGroup() 
 		{
+			if (myGroupId == null)
+			{
+				ResultText.text = "my group id is null.";
+				return;
+			}
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.SendMessage ("Hello Everybody!", (response) => {
 				ResultText.text = response.Successful ? "Send chat to group succeeded." : "failed; " + response.Message;
@@ -772,6 +796,11 @@ namespace Assets.BacktorySample
 
 		public void requestGroupChatHistory()
 		{
+			if (myGroupId == null)
+			{
+				ResultText.text = "my group id is null.";
+				return;
+			}
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.History(CurrentTimeMillis(), PrintCallBack<IList<AbsGroupChatMessage>>());
 		}
@@ -780,6 +809,11 @@ namespace Assets.BacktorySample
 
 		public void inviteToGroup() 
 		{
+			if (myGroupId == null)
+			{
+				ResultText.text = "my group id is null.";
+				return;
+			}
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.InviteToGroup (testUser1.userId,  (response) => {
 				ResultText.text = response.Successful ? "Invitation to group chat succeeded." : "failed; " + response.Message;
@@ -801,6 +835,11 @@ namespace Assets.BacktorySample
 
 		public void leaveGroup()
 		{
+			if (myGroupId == null)
+			{
+				ResultText.text = "my group id is null.";
+				return;
+			}			
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.LeaveGroup ((response) => {
 				ResultText.text = response.Successful ? "Left the group chat successfully!" : "failed; " + response.Message;
@@ -809,6 +848,11 @@ namespace Assets.BacktorySample
 
 		public void makeMemberOwner()
 		{
+			if (myGroupId == null)
+			{
+				ResultText.text = "my group id is null.";
+				return;
+			}			
 			var bgc = new BacktoryChat.Group (myGroupId);
 			bgc.MakeMemberOwner (testUser1.userId, (response) => {
 				ResultText.text = response.Successful ? "Member is owner now!" : "failed; " + response.Message;
